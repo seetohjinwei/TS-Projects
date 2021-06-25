@@ -14,7 +14,7 @@ window.onload = function() {
         active = true;
         board = ["", "", "", "", "", "", "", "", ""];
         document.querySelectorAll(".cell").forEach(cell => cell.innerHTML = "");
-        messageDisplay.innerHTML = `Game restarted! ${player1}'s move`
+        messageDisplay.innerHTML = `Game restarted! ${player1} (X)'s move`
     }
 }
 
@@ -26,12 +26,12 @@ function cellClicked(cellPressed) {
             turn = 2;
             cell.innerHTML = "X";
             board[index] = "X";
-            messageDisplay.innerHTML = `${player2}'s turn`;
+            messageDisplay.innerHTML = `${player2}'s turn (O)`;
         } else {
             turn = 1;
             cell.innerHTML = "O";
             board[index] = "O";
-            messageDisplay.innerHTML = `${player1}'s turn`;
+            messageDisplay.innerHTML = `${player1}'s turn (X)`;
         }
         checkGameState();
     }
