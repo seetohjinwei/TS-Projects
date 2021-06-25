@@ -1,0 +1,32 @@
+<html>
+    <script src="tictactoe.js"></script>
+    <head>
+        <title>Tic Tac Toe</title>
+        <link rel="stylesheet" href="tictactoe.css">
+        <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+        <meta content="utf-8" http-equiv="encoding">
+    </head>
+    <body>
+        <h1><a href="../projects.html">Tic Tac Toe</a></h1>
+        <h3>by Jin Wei</h3>
+        <button id="button-restart">Restart Game</button>
+        <div class="players">
+            <div id="player1"><span onclick="player1Input(this)">Player 1</span> (X)</div>
+            VS
+            <div id="player2"><span onclick="player2Input(this)">Player 2</span> (O)</div>
+            <div class="tip">Tip: you can press on the name to change names!</div>
+            Status: <span id="message">Player 1's turn</span>
+        </div>
+        <div class="board">
+            <div data-cell="0" class="cell"></div>
+            <div data-cell="1" class="cell"></div>
+            <div data-cell="2" class="cell"></div>
+            <div data-cell="3" class="cell"></div>
+            <div data-cell="4" class="cell"></div>
+            <div data-cell="5" class="cell"></div>
+            <div data-cell="6" class="cell"></div>
+            <div data-cell="7" class="cell"></div>
+            <div data-cell="8" class="cell"></div>
+        </div>
+    </body>
+</html>
