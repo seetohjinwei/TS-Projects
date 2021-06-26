@@ -48,8 +48,8 @@ function cellClicked(cellPressed) {
         checkGameState();
 
         if (active && player2 == "Easy AI") {
-            const spaces = board.filter(x => x == "").length;
-            const roll = Math.floor(Math.random() * spaces) + 1;
+            const emptyCells = 9 - turn;
+            const roll = Math.floor(Math.random() * emptyCells) + 1;
             let count = 0;
             for (let i = 0; i < board.length; i++) {
                 if (board[i] == "") {
