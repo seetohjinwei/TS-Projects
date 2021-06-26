@@ -3,6 +3,7 @@ let player2 = "Player 2";
 let turn = 0;
 let active = true;
 let board = ["", "", "", "", "", "", "", "", ""];
+let restarting = false;
 
 window.onload = function() {
     messageDisplay = document.getElementById("message");
@@ -29,6 +30,10 @@ window.onload = function() {
     document.getElementById("button-restart").onclick = function() {
         restartGame();
     }
+
+    document.addEventListener("keydown", function(press){
+        if (press.key == 'r') restartGame();
+    });
 }
 
 function cellClicked(cellPressed) {
@@ -122,12 +127,16 @@ function gameWon(x) {
 function restartGame() {
     turn = 0;
     active = true;
+    restarting = true;
     board = ["", "", "", "", "", "", "", "", ""];
     document.querySelectorAll(".cell").forEach(cell => cell.innerHTML = "");
     messageDisplay.innerHTML = `Game restarted! ${player1}'s move (X)`;
     setTimeout(() => {
         const currDisplay = messageDisplay.innerHTML;
-        if (currDisplay.startsWith("Game restarted!")) messageDisplay.innerHTML = `${player1}'s move (X)`;
+        if (restarting && currDisplay.startsWith("Game restarted!")) {
+            messageDisplay.innerHTML = `${player1}'s move (X)`;
+            restarting = false;
+        }
     }, 5000);
 }
 

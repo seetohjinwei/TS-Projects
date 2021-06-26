@@ -11,7 +11,33 @@
         <p><input type="text" id="user-input" autofocus></p>
         <p>
             <button id="button-palindrome">Palindrome Check</button>
+            <span id="display-palindrome"></span>
         </p>
-        <span id="output"></span>
+        <div>
+            <p>
+                <button id="button-tasks-add">Add to tasks</button>
+                <button id="button-tasks-remove">Remove from tasks: </button>
+                <input type="text" id="user-remove" size="1">
+                <span>(index)</span>
+            </p>
+            <p>
+                <button id="button-tasks-clear">Clear ALL tasks</button>
+            </p>
+            <p>
+                <span>Tasks:</span>
+                <span id="display-tasks"></span>
+            </p>
+            <ul>
+                <li>Type your task in the input field and press add</li>
+                <li>Click on the task to mark as done</li>
+                <li>Input index to remove in the field</li>
+                <ul>
+                    <li>"2": clears index 2</li>
+                    <li>"2-": clears index 2 to end of list</li>
+                    <li>"-2": clears from start of list to index 2</li>
+                    <li>"2-4" clears from index 2 to 4</li>
+                </ul>
+            </ul>
+        </div>
     </body>
 </html>
