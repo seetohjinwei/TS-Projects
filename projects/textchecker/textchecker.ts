@@ -79,6 +79,14 @@ function strikeThroughTask(item: HTMLSpanElement): void {
     const index: number = parseInt(item.getAttribute("data-index"));
     const text: string = item.innerText;
     item.innerHTML = `<span style="text-decoration:line-through"><em>${text}</em></span>`;
-    item.onclick = function(): void {};
+    item.onclick = function(): void { unstrikeTask(<HTMLSpanElement> this); };
     tasks[index] = "DONE~~~DEBUG" + tasks[index];
+}
+
+function unstrikeTask(item: HTMLSpanElement): void {
+    const index: number = parseInt(item.getAttribute("data-index"));
+    const text: string = item.innerText;
+    item.innerHTML = `<span>${text}</span>`;
+    item.onclick = function(): void { strikeThroughTask(<HTMLSpanElement> this); };
+    tasks[index] = tasks[index].substr(12);
 }

@@ -74,6 +74,13 @@ function strikeThroughTask(item) {
     var index = parseInt(item.getAttribute("data-index"));
     var text = item.innerText;
     item.innerHTML = "<span style=\"text-decoration:line-through\"><em>" + text + "</em></span>";
-    item.onclick = function () { };
+    item.onclick = function () { unstrikeTask(this); };
     tasks[index] = "DONE~~~DEBUG" + tasks[index];
+}
+function unstrikeTask(item) {
+    var index = parseInt(item.getAttribute("data-index"));
+    var text = item.innerText;
+    item.innerHTML = "<span>" + text + "</span>";
+    item.onclick = function () { strikeThroughTask(this); };
+    tasks[index] = tasks[index].substr(12);
 }
