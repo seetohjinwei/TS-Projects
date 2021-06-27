@@ -4,40 +4,46 @@
         <title>Tasks</title>
         <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
         <meta content="utf-8" http-equiv="encoding">
+        <style>
+            .body {
+                font-family: 'Times New Roman', Times, serif;
+            }
+        </style>
     </head>
     <body>
         <h1><a href="../projects.html">Tasks</a></h1>
         <h3>by Jin Wei</h3>
-        <p><input type="text" id="user-input" autofocus maxlength="50"></p>
+        <p>
+            <input type="text" id="user-input" autofocus maxlength="50">
+            <button id="button-tasks-add">+</button>
+        </p>
         <div>
             <p>
-                <button id="button-tasks-add">Add to tasks</button>
-                <button id="button-tasks-remove">Remove from tasks: </button>
-                <input type="text" id="user-remove" size="1">
-                <span>(index)</span>
-                <button id="button-tasks-clear">Clear ALL tasks</button>
+                <input type="text" id="user-remove" size="5">
+                <button id="button-tasks-remove">DEL</button>
+                <button id="button-tasks-clear">Clear ALL</button>
             </p>
             <p>
-                <button id="button-tasks-save">Save to browser</button>
+                <button id="button-tasks-save">Save</button>
                 <button id="button-tasks-recover">Recover last saved</button>
-                <button id="button-tasks-export">Export to another browser</button>
-                <button id="button-tasks-import">Import from another browser</button>
+                <button id="button-tasks-export">Export</button>
+                <button id="button-tasks-import">Import</button>
                 <input type="text" id="browser-import">
             </p>
-            <p>
-                <span>Tasks:</span>
-                <span id="display-tasks"></span>
-            </p>
-            <ul>
-                <li>Type your task in the input field and press add</li>
+            <span id="display-tasks"></span>
+            <button id="button-toggle-info"><span id="display-toggle-text">Show</span> Info</button>
+            <ul id="display-info">
+                <li>Tip: Enter works for both adding and removing</li>
+                <li>Type your task in the input field then press +</li>
                 <li>Click on the task to mark as done/undone</li>
                 <li>Click on waste bin to remove task</li>
-                <li>Input index to remove in the field</li>
+                <li>To bulk remove tasks, examples shown below, then, press DEL</li>
                 <ul>
                     <li>"2": clears index 2</li>
                     <li>"2-": clears index 2 to end of list</li>
                     <li>"-2": clears from start of list to index 2</li>
                     <li>"2-4" clears from index 2 to 4</li>
+                    <li>ignores any other entry</li>
                 </ul>
                 <li>Auto-saves when you refresh or close tab</li>
                 <li>Save to manually save</li>

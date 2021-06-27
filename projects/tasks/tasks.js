@@ -50,9 +50,22 @@ window.onload = function () {
         decodeTasks(browserImport.value);
         browserImport.value = "";
     };
+    var infoDisplay = document.getElementById("display-info");
+    var toggleInfo = document.getElementById("display-toggle-text");
+    infoDisplay.style.display = "none";
+    document.getElementById("button-toggle-info").onclick = function () {
+        if (toggleInfo.innerHTML === "Show") {
+            toggleInfo.innerText = "Hide";
+            infoDisplay.style.display = "block";
+        }
+        else {
+            toggleInfo.innerText = "Show";
+            infoDisplay.style.display = "none";
+        }
+    };
 };
 window.onbeforeunload = function () {
-    console.log("detected refresh");
+    console.log("detected refresh or tab close");
     saveFunc();
 };
 function saveFunc() {
@@ -93,6 +106,8 @@ function removeFunc() {
         var numToRemove = parseInt(input.substr(1));
         tasks.splice(0, numToRemove);
     }
+    else
+        return;
     userRemove.value = "";
     taskDisplayFunc();
 }

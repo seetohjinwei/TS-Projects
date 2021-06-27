@@ -10,10 +10,10 @@ let browserImport: HTMLInputElement;
 
 // https://stackoverflow.com/questions/3357553/how-do-i-store-an-array-in-localstorage
 Storage.prototype.setTasks = function(obj: task[]): string {
-    return this.setItem("tasks", JSON.stringify(obj))
+    return this.setItem("tasks", JSON.stringify(obj));
 }
 Storage.prototype.getTasks = function(): task[] {
-    return JSON.parse(this.getItem("tasks"))
+    return JSON.parse(this.getItem("tasks"));
 }
 
 window.onload = function(): void {
@@ -64,10 +64,23 @@ window.onload = function(): void {
         decodeTasks(browserImport.value);
         browserImport.value = "";
     };
+
+    const infoDisplay: HTMLUListElement = <HTMLUListElement> document.getElementById("display-info");
+    const toggleInfo: HTMLSpanElement = <HTMLSpanElement> document.getElementById("display-toggle-text");
+    infoDisplay.style.display = "none";
+    document.getElementById("button-toggle-info").onclick = function(): void {
+        if (toggleInfo.innerHTML === "Show") {
+            toggleInfo.innerText = "Hide";
+            infoDisplay.style.display = "block";
+        } else {
+            toggleInfo.innerText = "Show";
+            infoDisplay.style.display = "none";
+        }
+    }
 }
 
 window.onbeforeunload = function(): void {
-    console.log("detected refresh")
+    console.log("detected refresh or tab close")
     saveFunc();
 }
 
@@ -107,7 +120,7 @@ function removeFunc(): void {
     } else if (input.match(/^-\d+$/)) {
         const numToRemove: number = parseInt(input.substr(1));
         tasks.splice(0, numToRemove);
-    }
+    } else return;
     userRemove.value = "";
     taskDisplayFunc();
 }
