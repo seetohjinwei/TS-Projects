@@ -1,27 +1,28 @@
 <html>
-    <script src="textchecker.js"></script>
+    <script src="tasks.js"></script>
     <head>
-        <title>Text Checker</title>
+        <title>Tasks</title>
         <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
         <meta content="utf-8" http-equiv="encoding">
     </head>
     <body>
-        <h1><a href="../projects.html">Text Checker</a></h1>
+        <h1><a href="../projects.html">Tasks</a></h1>
         <h3>by Jin Wei</h3>
-        <p><input type="text" id="user-input" autofocus></p>
-        <p>
-            <button id="button-palindrome">Palindrome Check</button>
-            <span id="display-palindrome"></span>
-        </p>
+        <p><input type="text" id="user-input" autofocus maxlength="50"></p>
         <div>
             <p>
                 <button id="button-tasks-add">Add to tasks</button>
                 <button id="button-tasks-remove">Remove from tasks: </button>
                 <input type="text" id="user-remove" size="1">
                 <span>(index)</span>
+                <button id="button-tasks-clear">Clear ALL tasks</button>
             </p>
             <p>
-                <button id="button-tasks-clear">Clear ALL tasks</button>
+                <button id="button-tasks-save">Save to browser</button>
+                <button id="button-tasks-recover">Recover last saved</button>
+                <button id="button-tasks-export">Export to another browser</button>
+                <button id="button-tasks-import">Import from another browser</button>
+                <input type="text" id="browser-import">
             </p>
             <p>
                 <span>Tasks:</span>
@@ -37,6 +38,10 @@
                     <li>"-2": clears from start of list to index 2</li>
                     <li>"2-4" clears from index 2 to 4</li>
                 </ul>
+                <li>Auto-saves when you refresh or close tab</li>
+                <li>Save to manually save</li>
+                <li>Recover to go back to browser's last save</li>
+                <li>Import/export from a hash in the input field</li>
             </ul>
         </div>
     </body>
