@@ -151,7 +151,7 @@ function encodeTasks() {
     return tasksEncoded.join(";");
 }
 function decodeTasks(hash) {
-    if (!hash.match(/^[01][a-zA-Z\d]+(;[01][a-zA-Z\d]+)*$/))
+    if (!hash.match(/^[01][^;]+(;[01][^;]+)*$/))
         return;
     var tasksEncoded = hash.split(";");
     tasks = [];
