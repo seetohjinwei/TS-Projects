@@ -65,10 +65,10 @@ function recoverFunc() {
 }
 function addFunc() {
     var input = userInput.value;
-    var sanitisedInput = input.replaceAll(/[^a-zA-Z\d ]/g, "");
-    if (!input.match(/\S/))
+    var sanitisedInput = input.replaceAll(/;/g, "");
+    if (!sanitisedInput.match(/\S/))
         return;
-    tasks.push([input, false]);
+    tasks.push([sanitisedInput, false]);
     userInput.value = "";
     taskDisplayFunc();
 }
@@ -98,17 +98,27 @@ function removeFunc() {
 }
 function taskDisplayFunc() {
     var ol = document.createElement("ol");
-    for (var i = 0; i < tasks.length; i++) {
+    var _loop_1 = function (i) {
         var li = document.createElement("li");
-        var itemToAppend = document.createElement("span");
-        itemToAppend.setAttribute("data-index", i.toString());
-        itemToAppend.innerText = tasks[i][0];
+        var binIcon = document.createElement("span");
+        binIcon.innerHTML = "&#128465";
+        binIcon.onclick = function () { deleteThisTask(i); };
+        li.appendChild(binIcon);
+        var emptySpace = document.createElement("span");
+        emptySpace.innerText = " ";
+        li.appendChild(emptySpace);
+        var taskToAppend = document.createElement("span");
+        taskToAppend.setAttribute("data-index", i.toString());
+        taskToAppend.innerText = tasks[i][0];
         if (tasks[i][1])
-            strikeThroughTask(itemToAppend);
+            strikeThroughTask(taskToAppend);
         else
-            unstrikeTask(itemToAppend);
-        li.appendChild(itemToAppend);
+            unstrikeTask(taskToAppend);
+        li.appendChild(taskToAppend);
         ol.appendChild(li);
+    };
+    for (var i = 0; i < tasks.length; i++) {
+        _loop_1(i);
     }
     taskDisplay.innerHTML = "";
     taskDisplay.appendChild(ol);
@@ -128,6 +138,8 @@ function unstrikeTask(item) {
     tasks[index][1] = false;
 }
 function deleteThisTask(index) {
+    tasks.splice(index, 1);
+    taskDisplayFunc();
 }
 function encodeTasks() {
     var tasksEncoded = [];

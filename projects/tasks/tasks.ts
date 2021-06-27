@@ -83,9 +83,9 @@ function recoverFunc(): void {
 
 function addFunc(): void {
     const input: string = userInput.value;
-    const sanitisedInput: string = input.replaceAll(/[^a-zA-Z\d ]/g, "");
-    if (!input.match(/\S/)) return;
-    tasks.push([input, false]);
+    const sanitisedInput: string = input.replaceAll(/;/g, "");
+    if (!sanitisedInput.match(/\S/)) return;
+    tasks.push([sanitisedInput, false]);
     userInput.value = "";
     taskDisplayFunc();
 }
@@ -116,12 +116,23 @@ function taskDisplayFunc(): void {
     const ol = document.createElement("ol");
     for (let i = 0; i < tasks.length; i++) {
         const li: HTMLLIElement = document.createElement("li");
-        const itemToAppend: HTMLSpanElement = document.createElement("span");
-        itemToAppend.setAttribute("data-index", i.toString());
-        itemToAppend.innerText = tasks[i][0];
-        if (tasks[i][1]) strikeThroughTask(itemToAppend);
-        else             unstrikeTask(itemToAppend);
-        li.appendChild(itemToAppend);
+
+        const binIcon: HTMLSpanElement = document.createElement("span");
+        binIcon.innerHTML = "&#128465";
+        binIcon.onclick = function():void { deleteThisTask(i) };
+        li.appendChild(binIcon);
+
+        const emptySpace: HTMLSpanElement = document.createElement("span");
+        emptySpace.innerText = " ";
+        li.appendChild(emptySpace);
+
+        const taskToAppend: HTMLSpanElement = document.createElement("span");
+        taskToAppend.setAttribute("data-index", i.toString());
+        taskToAppend.innerText = tasks[i][0];
+        if (tasks[i][1]) strikeThroughTask(taskToAppend);
+        else             unstrikeTask(taskToAppend);
+        li.appendChild(taskToAppend);
+
         ol.appendChild(li);
     }
     taskDisplay.innerHTML = "";
@@ -145,7 +156,8 @@ function unstrikeTask(item: HTMLSpanElement): void {
 }
 
 function deleteThisTask(index: number): void {
-    
+    tasks.splice(index, 1);
+    taskDisplayFunc();
 }
 
 function encodeTasks(): string {
