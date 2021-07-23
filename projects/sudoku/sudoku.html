@@ -1,0 +1,42 @@
+<html>
+    <head>
+        <title>Sudoku</title>
+        <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+        <meta content="utf-8" http-equiv="encoding">
+        <style>
+            .body {
+                font-family: 'Times New Roman', Times, serif;
+            }
+            .display-board table {
+                table-layout: fixed;
+                width: 280px;
+            }
+            .display-board td {
+                border: 1px solid black;
+                text-align: center;
+                vertical-align: middle;
+                width: 30px;
+                height: 30px;
+                overflow: hidden;
+            }
+        </style>
+    </head>
+    <body>
+        <h1><a href="../projects.html">Sudoku</a></h1>
+        <h3>by Jin Wei</h3>
+        <span id="display-message"></span>
+        <br>
+        <button id="button-solve">Solve!</button>
+        <table class="display-board">
+            <tbody id="display-board"></tbody>
+        </table>
+        <button id="button-toggle-info"><span id="display-toggle-text">Show</span> Info</button>
+        <ul id="display-info">
+            <li>Press on cell and type 1-9 to input value</li>
+            <li>Can select multiple cells before inputting value</li>
+            <li>Press 0 to clear value</li>
+            <li>Then hit solve!</li>
+        </ul>
+    </body>
+    <script src="sudoku.js"></script>
+</html>

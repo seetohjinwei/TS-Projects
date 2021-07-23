@@ -65,18 +65,7 @@ window.onload = function(): void {
         browserImport.value = "";
     };
 
-    const infoDisplay: HTMLUListElement = <HTMLUListElement> document.getElementById("display-info");
-    const toggleInfo: HTMLSpanElement = <HTMLSpanElement> document.getElementById("display-toggle-text");
-    infoDisplay.style.display = "none";
-    document.getElementById("button-toggle-info").onclick = function(): void {
-        if (toggleInfo.innerHTML === "Show") {
-            toggleInfo.innerText = "Hide";
-            infoDisplay.style.display = "block";
-        } else {
-            toggleInfo.innerText = "Show";
-            infoDisplay.style.display = "none";
-        }
-    }
+    displayInfo();
 }
 
 window.onbeforeunload = function(): void {
@@ -193,4 +182,19 @@ function decodeTasks(hash: string): void {
         tasks.push([item, done]);
     }
     saveFunc();
+}
+
+function displayInfo(): void {
+    const infoDisplay: HTMLUListElement = <HTMLUListElement> document.getElementById("display-info");
+    const toggleInfo: HTMLSpanElement = <HTMLSpanElement> document.getElementById("display-toggle-text");
+    infoDisplay.style.display = "none";
+    document.getElementById("button-toggle-info").onclick = function(): void {
+        if (toggleInfo.innerHTML === "Show") {
+            toggleInfo.innerText = "Hide";
+            infoDisplay.style.display = "block";
+        } else {
+            toggleInfo.innerText = "Show";
+            infoDisplay.style.display = "none";
+        }
+    }
 }
