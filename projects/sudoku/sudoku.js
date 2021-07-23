@@ -1,22 +1,11 @@
 var board = Array(9).fill(Array(9).fill(0));
 var message = document.getElementById("display-message");
-var button = document.getElementById("button-solve");
+var buttonSolve = document.getElementById("button-solve");
+var buttonReset = document.getElementById("button-reset");
 var display = document.getElementById("display-board");
 window.onload = function () {
     updateBoard();
-    var infoDisplay = document.getElementById("display-info");
-    var toggleInfo = document.getElementById("display-toggle-text");
-    infoDisplay.style.display = "none";
-    document.getElementById("button-toggle-info").onclick = function () {
-        if (toggleInfo.innerHTML === "Show") {
-            toggleInfo.innerText = "Hide";
-            infoDisplay.style.display = "block";
-        }
-        else {
-            toggleInfo.innerText = "Show";
-            infoDisplay.style.display = "none";
-        }
-    };
+    displayInfo();
 };
 function updateBoard() {
     while (display.hasChildNodes()) {
@@ -53,3 +42,22 @@ function clickCell(cellPressed) {
     }
     document.addEventListener('keydown', readValue);
 }
+function displayInfo() {
+    var infoDisplay = document.getElementById("display-info");
+    var toggleInfo = document.getElementById("display-toggle-text");
+    infoDisplay.style.display = "none";
+    document.getElementById("button-toggle-info").onclick = function () {
+        if (toggleInfo.innerHTML === "Show") {
+            toggleInfo.innerText = "Hide";
+            infoDisplay.style.display = "block";
+        }
+        else {
+            toggleInfo.innerText = "Show";
+            infoDisplay.style.display = "none";
+        }
+    };
+}
+buttonReset.onclick = function () {
+    board = Array(9).fill(Array(9).fill(0));
+    updateBoard();
+};

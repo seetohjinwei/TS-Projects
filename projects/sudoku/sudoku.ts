@@ -1,6 +1,7 @@
-const board: number[][] = Array(9).fill(Array(9).fill(0));
+var board: number[][] = Array(9).fill(Array(9).fill(0));
 const message: HTMLElement = document.getElementById("display-message");
-const button: HTMLElement = document.getElementById("button-solve");
+const buttonSolve: HTMLElement = document.getElementById("button-solve");
+const buttonReset: HTMLElement = document.getElementById("button-reset");
 const display: HTMLElement = document.getElementById("display-board");
 
 window.onload = function (): void {
@@ -22,7 +23,7 @@ function updateBoard(): void {
             td.setAttribute("row", i.toString());
             td.setAttribute("col", j.toString());
             td.addEventListener('click', clickCell);
-
+            
             tr.appendChild(td);
         }
         display.appendChild(tr);
@@ -59,4 +60,9 @@ function displayInfo(): void {
             infoDisplay.style.display = "none";
         }
     }
+}
+
+buttonReset.onclick = function(): void {
+    board = Array(9).fill(Array(9).fill(0));
+    updateBoard();
 }
