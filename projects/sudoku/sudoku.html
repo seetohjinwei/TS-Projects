@@ -7,17 +7,33 @@
             .body {
                 font-family: 'Times New Roman', Times, serif;
             }
-            .display-board table {
+            table {
+                border-collapse: collapse;
                 table-layout: fixed;
                 width: 280px;
             }
-            .display-board td {
-                border: 1px solid black;
+            tbody {
+                border: solid medium black;
+            }
+            td {
+                border: solid thin black;
                 text-align: center;
                 vertical-align: middle;
                 width: 30px;
                 height: 30px;
                 overflow: hidden;
+            }
+            td:first-child {
+                border-left:solid;
+            }
+            td:nth-child(3n) {
+                border-right:solid ;
+            }
+            tr:first-child {
+                border-top:solid;
+            }
+            tr:nth-child(3n) td {
+                border-bottom:solid ;
             }
         </style>
     </head>
@@ -50,6 +66,7 @@
                 <li>Then hit solve!</li>
             </ul>
             <li>Give >20 clues!</li>
+            <li>Give a proper sudoku (only 1 solution), otherwise results not guranteed!</li>
             <li>Done with backtracking</li>
             <li><a href="https://www.youtube.com/watch?v=G_UYXzGuqvM" target=”_blank”>Computerphile YouTube video</a></li>
         </ul>

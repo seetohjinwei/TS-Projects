@@ -34,27 +34,28 @@ function updateBoard(displayInput: boolean): void {
             td.setAttribute("row", i.toString());
             td.setAttribute("col", j.toString());
             td.addEventListener('click', clickCell);
-            
+
             tr.appendChild(td);
         }
         if (displayInput) {
+            tr.appendChild(document.createElement("td"));
             const td_value: HTMLTableDataCellElement = document.createElement("td");
             td_value.innerText = (i + 1).toString();
             td_value.setAttribute("value", (i + 1).toString());
             td_value.addEventListener('click', clickValue);
-            tr.append(td_value);
+            tr.appendChild(td_value);
             if (i === 0) {
                 const td_value: HTMLTableDataCellElement = document.createElement("td");
                 td_value.innerText = "C";
                 td_value.setAttribute("value", "C");
                 td_value.addEventListener('click', clickValue);
-                tr.append(td_value);
+                tr.appendChild(td_value);
             } else if (i === 1) {
                 const td_value: HTMLTableDataCellElement = document.createElement("td");
                 td_value.innerText = "0";
                 td_value.setAttribute("value", "0");
                 td_value.addEventListener('click', clickValue);
-                tr.append(td_value);
+                tr.appendChild(td_value);
             }
         }
         display.appendChild(tr);

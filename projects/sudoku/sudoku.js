@@ -35,24 +35,25 @@ function updateBoard(displayInput) {
             tr.appendChild(td);
         }
         if (displayInput) {
+            tr.appendChild(document.createElement("td"));
             var td_value = document.createElement("td");
             td_value.innerText = (i + 1).toString();
             td_value.setAttribute("value", (i + 1).toString());
             td_value.addEventListener('click', clickValue);
-            tr.append(td_value);
+            tr.appendChild(td_value);
             if (i === 0) {
                 var td_value_1 = document.createElement("td");
                 td_value_1.innerText = "C";
                 td_value_1.setAttribute("value", "C");
                 td_value_1.addEventListener('click', clickValue);
-                tr.append(td_value_1);
+                tr.appendChild(td_value_1);
             }
             else if (i === 1) {
                 var td_value_2 = document.createElement("td");
                 td_value_2.innerText = "0";
                 td_value_2.setAttribute("value", "0");
                 td_value_2.addEventListener('click', clickValue);
-                tr.append(td_value_2);
+                tr.appendChild(td_value_2);
             }
         }
         display.appendChild(tr);
