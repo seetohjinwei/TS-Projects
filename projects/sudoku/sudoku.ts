@@ -1,4 +1,14 @@
-var board: number[][] = Array(9).fill(Array(9).fill(0));
+var board: number[][] = [
+    [0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0]
+];
 const message: HTMLElement = document.getElementById("display-message");
 const buttonSolve: HTMLElement = document.getElementById("button-solve");
 const buttonReset: HTMLElement = document.getElementById("button-reset");
@@ -18,7 +28,7 @@ function updateBoard(): void {
         for (let j = 0; j < 9; j++) {
             const td: HTMLTableDataCellElement = document.createElement("td");
             const value: number = board[i][j];
-            const displayedValue: string = (value == 0) ? "" : value.toString();
+            const displayedValue: string = (value === 0) ? "" : value.toString();
             td.innerText = displayedValue;
             td.setAttribute("row", i.toString());
             td.setAttribute("col", j.toString());
@@ -63,6 +73,69 @@ function displayInfo(): void {
 }
 
 buttonReset.onclick = function(): void {
-    board = Array(9).fill(Array(9).fill(0));
+    board = [
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0]
+    ];
     updateBoard();
+    message.innerText = "";
+}
+
+function validBoard(): boolean {
+    for (let i = 0; i < 9; i++) {
+        for (let j = 0; j < 9; j++) {
+            if (board[i][j] !== 0 && !validPos(i, j, board[i][j])) return false;
+        }
+    }
+    return true;
+}
+
+function solve(): void {
+    for (let r = 0; r < 9; r++) {
+        for (let c = 0; c < 9; c++) {
+            if (board[r][c] === 0) {
+                for (let n = 1; n <= 9; n++) {
+                    if (validPos(r, c, n)) {
+                        board[r][c] = n;
+                        solve();
+                        board[r][c] = 0;
+                    }
+                }
+                return;
+            }
+        }
+    }
+    updateBoard();
+}
+
+function validPos(r: number, c: number, value: number): boolean {
+    // there is a need to check if i !== c or r because of validBoard() calling
+    // this function on values already in board
+    for (let i = 0; i < 9; i++) {
+        if (i !== c && board[r][i] === value) return false;
+        if (i !== r && board[i][c] === value) return false;
+    }
+    const r1: number = ~~(r / 3) * 3;
+    const c1: number = ~~(c / 3) * 3;
+    for (let i = r1; i < r1 + 3; i++) {
+        for (let j = c1; j < c1 + 3; j++) {
+            if (i !== r && j !== c && board[i][j] === value) return false;
+        }
+    }
+    return true;
+}
+
+buttonSolve.onclick = function(): void {
+    if (!validBoard()) {
+        message.innerText = "Invalid board!";
+        return;
+    }
+    solve();
 }

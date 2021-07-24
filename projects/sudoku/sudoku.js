@@ -1,4 +1,14 @@
-var board = Array(9).fill(Array(9).fill(0));
+var board = [
+    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0]
+];
 var message = document.getElementById("display-message");
 var buttonSolve = document.getElementById("button-solve");
 var buttonReset = document.getElementById("button-reset");
@@ -16,7 +26,7 @@ function updateBoard() {
         for (var j = 0; j < 9; j++) {
             var td = document.createElement("td");
             var value = board[i][j];
-            var displayedValue = (value == 0) ? "" : value.toString();
+            var displayedValue = (value === 0) ? "" : value.toString();
             td.innerText = displayedValue;
             td.setAttribute("row", i.toString());
             td.setAttribute("col", j.toString());
@@ -58,6 +68,67 @@ function displayInfo() {
     };
 }
 buttonReset.onclick = function () {
-    board = Array(9).fill(Array(9).fill(0));
+    board = [
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0]
+    ];
     updateBoard();
+    message.innerText = "";
+};
+function validBoard() {
+    for (var i = 0; i < 9; i++) {
+        for (var j = 0; j < 9; j++) {
+            if (board[i][j] !== 0 && !validPos(i, j, board[i][j]))
+                return false;
+        }
+    }
+    return true;
+}
+function solve() {
+    for (var r = 0; r < 9; r++) {
+        for (var c = 0; c < 9; c++) {
+            if (board[r][c] === 0) {
+                for (var n = 1; n <= 9; n++) {
+                    if (validPos(r, c, n)) {
+                        board[r][c] = n;
+                        solve();
+                        board[r][c] = 0;
+                    }
+                }
+                return;
+            }
+        }
+    }
+    updateBoard();
+}
+function validPos(r, c, value) {
+    for (var i = 0; i < 9; i++) {
+        if (i !== c && board[r][i] === value)
+            return false;
+        if (i !== r && board[i][c] === value)
+            return false;
+    }
+    var r1 = ~~(r / 3) * 3;
+    var c1 = ~~(c / 3) * 3;
+    for (var i = r1; i < r1 + 3; i++) {
+        for (var j = c1; j < c1 + 3; j++) {
+            if (i !== r && j !== c && board[i][j] === value)
+                return false;
+        }
+    }
+    return true;
+}
+buttonSolve.onclick = function () {
+    if (!validBoard()) {
+        message.innerText = "Invalid board!";
+        return;
+    }
+    solve();
 };
