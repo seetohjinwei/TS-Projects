@@ -13,11 +13,12 @@ var message = document.getElementById("display-message");
 var buttonSolve = document.getElementById("button-solve");
 var buttonReset = document.getElementById("button-reset");
 var display = document.getElementById("display-board");
+var value = null;
 window.onload = function () {
-    updateBoard();
+    updateBoard(true);
     displayInfo();
 };
-function updateBoard() {
+function updateBoard(displayInput) {
     while (display.hasChildNodes()) {
         display.removeChild(display.firstChild);
     }
@@ -25,13 +26,34 @@ function updateBoard() {
         var tr = document.createElement("tr");
         for (var j = 0; j < 9; j++) {
             var td = document.createElement("td");
-            var value = board[i][j];
-            var displayedValue = (value === 0) ? "" : value.toString();
+            var value_1 = board[i][j];
+            var displayedValue = (value_1 === 0) ? "" : value_1.toString();
             td.innerText = displayedValue;
             td.setAttribute("row", i.toString());
             td.setAttribute("col", j.toString());
             td.addEventListener('click', clickCell);
             tr.appendChild(td);
+        }
+        if (displayInput) {
+            var td_value = document.createElement("td");
+            td_value.innerText = (i + 1).toString();
+            td_value.setAttribute("value", (i + 1).toString());
+            td_value.addEventListener('click', clickValue);
+            tr.append(td_value);
+            if (i === 0) {
+                var td_value_1 = document.createElement("td");
+                td_value_1.innerText = "C";
+                td_value_1.setAttribute("value", "C");
+                td_value_1.addEventListener('click', clickValue);
+                tr.append(td_value_1);
+            }
+            else if (i === 1) {
+                var td_value_2 = document.createElement("td");
+                td_value_2.innerText = "0";
+                td_value_2.setAttribute("value", "0");
+                td_value_2.addEventListener('click', clickValue);
+                tr.append(td_value_2);
+            }
         }
         display.appendChild(tr);
     }
@@ -50,7 +72,17 @@ function clickCell(cellPressed) {
             document.removeEventListener('keydown', readValue);
         }
     }
-    document.addEventListener('keydown', readValue);
+    if (value === null)
+        document.addEventListener('keydown', readValue);
+    else {
+        board[row][col] = value;
+        cell.innerText = (value === 0) ? "" : value.toString();
+    }
+}
+function clickValue(cellPressed) {
+    var cell = cellPressed.target;
+    var input = cell.getAttribute("value");
+    value = (input === "C") ? null : parseInt(input);
 }
 function displayInfo() {
     var infoDisplay = document.getElementById("display-info");
@@ -79,15 +111,25 @@ buttonReset.onclick = function () {
         [0, 0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0, 0]
     ];
-    updateBoard();
-    message.innerText = "";
+    updateBoard(true);
+    message.innerText = "Reset!";
 };
 function validBoard() {
+    var count = 0;
     for (var i = 0; i < 9; i++) {
         for (var j = 0; j < 9; j++) {
-            if (board[i][j] !== 0 && !validPos(i, j, board[i][j]))
-                return false;
+            if (board[i][j] !== 0) {
+                count++;
+                if (!validPos(i, j, board[i][j])) {
+                    message.innerText = "Invalid board!";
+                    return false;
+                }
+            }
         }
+    }
+    if (count <= 20) {
+        message.innerText = "Give >20 clues";
+        return false;
     }
     return true;
 }
@@ -106,7 +148,7 @@ function solve() {
             }
         }
     }
-    updateBoard();
+    updateBoard(false);
 }
 function validPos(r, c, value) {
     for (var i = 0; i < 9; i++) {
@@ -126,9 +168,8 @@ function validPos(r, c, value) {
     return true;
 }
 buttonSolve.onclick = function () {
-    if (!validBoard()) {
-        message.innerText = "Invalid board!";
+    if (!validBoard())
         return;
-    }
     solve();
+    message.innerText = "Solved!";
 };

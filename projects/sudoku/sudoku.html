@@ -24,7 +24,7 @@
     <body>
         <h1><a href="../projects.html">Sudoku</a></h1>
         <h3>by Jin Wei</h3>
-        <span id="display-message"></span>
+        <span id="display-message">Go ahead!</span>
         <br>
         <button id="button-solve">Solve!</button>
         <button id="button-reset">Reset Board</button>
@@ -33,13 +33,25 @@
         </table>
         <button id="button-toggle-info"><span id="display-toggle-text">Show</span> Info</button>
         <ul id="display-info">
-            <li>Press on cell and type 1-9 to input value</li>
-            <li>Can select multiple cells before inputting value</li>
-            <li>Press 0 to clear value</li>
-            <li>Then hit solve!</li>
-            <li>Try and give >20 clues, otherwise might take super long!</li>
+            <li>2 options for input</li>
+            <li>Keyboard</li>
+            <ul>
+                <li>Select cell and type 1-9 to input value</li>
+                <li>Can select multiple cells before inputting value</li>
+                <li>Press 0 to clear value</li>
+                <li>Then hit solve!</li>
+            </ul>
+            <li>On-screen buttons</li>
+            <ul>
+                <li>Select input value on right side</li>
+                <li>Then, select cell to input value</li>
+                <li>Use C to clear input value (to be able to use keyboard)</li>
+                <li>Use 0 to switch input value to eraser</li>
+                <li>Then hit solve!</li>
+            </ul>
+            <li>Give >20 clues!</li>
             <li>Done with backtracking</li>
-            <li><a href="https://www.youtube.com/watch?v=G_UYXzGuqvM" target=”_blank”>ComputerPhile YouTube video</a></li>
+            <li><a href="https://www.youtube.com/watch?v=G_UYXzGuqvM" target=”_blank”>Computerphile YouTube video</a></li>
         </ul>
     </body>
     <script src="sudoku.js"></script>

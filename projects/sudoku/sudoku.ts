@@ -13,13 +13,14 @@ const message: HTMLElement = document.getElementById("display-message");
 const buttonSolve: HTMLElement = document.getElementById("button-solve");
 const buttonReset: HTMLElement = document.getElementById("button-reset");
 const display: HTMLElement = document.getElementById("display-board");
+let value: number = null;
 
 window.onload = function (): void {
-    updateBoard();
+    updateBoard(true);
     displayInfo();
 }
 
-function updateBoard(): void {
+function updateBoard(displayInput: boolean): void {
     while (display.hasChildNodes()) {
         display.removeChild(display.firstChild);
     }
@@ -36,16 +37,36 @@ function updateBoard(): void {
             
             tr.appendChild(td);
         }
+        if (displayInput) {
+            const td_value: HTMLTableDataCellElement = document.createElement("td");
+            td_value.innerText = (i + 1).toString();
+            td_value.setAttribute("value", (i + 1).toString());
+            td_value.addEventListener('click', clickValue);
+            tr.append(td_value);
+            if (i === 0) {
+                const td_value: HTMLTableDataCellElement = document.createElement("td");
+                td_value.innerText = "C";
+                td_value.setAttribute("value", "C");
+                td_value.addEventListener('click', clickValue);
+                tr.append(td_value);
+            } else if (i === 1) {
+                const td_value: HTMLTableDataCellElement = document.createElement("td");
+                td_value.innerText = "0";
+                td_value.setAttribute("value", "0");
+                td_value.addEventListener('click', clickValue);
+                tr.append(td_value);
+            }
+        }
         display.appendChild(tr);
     }
 }
 
 function clickCell(cellPressed): void {
-    const cell: HTMLTableCellElement = cellPressed.target;
+    const cell: HTMLTableDataCellElement = cellPressed.target;
     const row: number = parseInt(cell.getAttribute("row"));
     const col: number = parseInt(cell.getAttribute("col"));
     let endListen = false;
-    function readValue(press): void {
+    function readValue(press: KeyboardEvent): void {
         const value = press.key;
         if (['0','1','2','3','4','5','6','7','8','9'].includes(value)) {
             let key: number = parseInt(value);
@@ -54,7 +75,17 @@ function clickCell(cellPressed): void {
             document.removeEventListener('keydown', readValue);
         }
     }
-    document.addEventListener('keydown', readValue);
+    if (value === null) document.addEventListener('keydown', readValue);
+    else {
+        board[row][col] = value;
+        cell.innerText = (value === 0) ? "" : value.toString();
+    }
+}
+
+function clickValue(cellPressed): void {
+    const cell: HTMLTableDataCellElement = cellPressed.target;
+    const input: string = cell.getAttribute("value");
+    value = (input === "C") ? null : parseInt(input);
 }
 
 function displayInfo(): void {
@@ -84,15 +115,26 @@ buttonReset.onclick = function(): void {
         [0,0,0,0,0,0,0,0,0],
         [0,0,0,0,0,0,0,0,0]
     ];
-    updateBoard();
-    message.innerText = "";
+    updateBoard(true);
+    message.innerText = "Reset!";
 }
 
 function validBoard(): boolean {
+    let count: number = 0;
     for (let i = 0; i < 9; i++) {
         for (let j = 0; j < 9; j++) {
-            if (board[i][j] !== 0 && !validPos(i, j, board[i][j])) return false;
+            if (board[i][j] !== 0) {
+                count++;
+                if (!validPos(i, j, board[i][j])) {
+                    message.innerText = "Invalid board!";
+                    return false;
+                }
+            }
         }
+    }
+    if (count <= 20) {
+        message.innerText = "Give >20 clues";
+        return false;
     }
     return true;
 }
@@ -112,7 +154,7 @@ function solve(): void {
             }
         }
     }
-    updateBoard();
+    updateBoard(false);
 }
 
 function validPos(r: number, c: number, value: number): boolean {
@@ -133,9 +175,7 @@ function validPos(r: number, c: number, value: number): boolean {
 }
 
 buttonSolve.onclick = function(): void {
-    if (!validBoard()) {
-        message.innerText = "Invalid board!";
-        return;
-    }
+    if (!validBoard()) return;
     solve();
+    message.innerText = "Solved!";
 }
