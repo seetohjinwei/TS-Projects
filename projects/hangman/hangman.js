@@ -1,9 +1,5 @@
 var health = 1;
 var picture;
-var wordInput;
-var buttonStart;
-var buttonReset;
-var alphabets;
 var guessArea;
 var word = "";
 var in_game = false;
@@ -14,11 +10,9 @@ var table = [
 ];
 window.onload = function () {
     picture = document.getElementById("display-health");
-    wordInput = document.getElementById("word");
-    buttonStart = document.getElementById("button-start");
-    buttonReset = document.getElementById("button-reset");
-    alphabets = document.getElementById("alphabets");
     guessArea = document.getElementById("guess-area");
+    var buttonStart = document.getElementById("button-start");
+    var buttonReset = document.getElementById("button-reset");
     buttonStart.onclick = function () {
         startGame();
     };
@@ -57,6 +51,7 @@ function resetGame() {
     generateAlphabets();
 }
 function generateAlphabets() {
+    var alphabets = document.getElementById("alphabets");
     while (alphabets.hasChildNodes()) {
         alphabets.removeChild(alphabets.firstChild);
     }
@@ -93,7 +88,7 @@ function generateGuessArea() {
     for (var i = 0; i < word.length; i++) {
         var char = word[i];
         var value = word.charCodeAt(i);
-        if (value == 32) {
+        if (value === 32) {
             string += " ";
         }
         else if (table[value - 65]) {
@@ -105,7 +100,7 @@ function generateGuessArea() {
         }
     }
     guessArea.innerText = string;
-    if (unsolved == 0) {
+    if (unsolved === 0) {
         in_game = false;
         alert("You won!");
     }
@@ -117,13 +112,14 @@ function reduceHealth() {
     picture.src = "pics/" + health + ".png";
 }
 function startGame() {
+    var wordInput = document.getElementById("word");
     if (wordInput.value.length < 5)
         return;
     word = wordInput.value.toUpperCase();
     var length = 0;
     for (var i = 0; i < word.length; i++) {
         var value = word.charCodeAt(i);
-        if (value == 32)
+        if (value === 32)
             continue;
         if (value < 65 || value > 90) {
             resetGame();

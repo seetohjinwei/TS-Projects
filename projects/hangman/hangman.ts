@@ -1,9 +1,5 @@
 let health: number = 1;  // from 1 - 5 (6 is dead)
 var picture: HTMLImageElement;
-var wordInput: HTMLInputElement;
-var buttonStart: HTMLButtonElement;
-var buttonReset: HTMLButtonElement;
-var alphabets: HTMLDivElement;
 var guessArea: HTMLSpanElement;
 var word: string = "";
 var in_game: boolean = false;
@@ -15,11 +11,10 @@ var table: boolean[] = [
 
 window.onload = function(): void {
     picture = <HTMLImageElement> document.getElementById("display-health");
-    wordInput = <HTMLInputElement> document.getElementById("word");
-    buttonStart = <HTMLButtonElement> document.getElementById("button-start");
-    buttonReset = <HTMLButtonElement> document.getElementById("button-reset");
-    alphabets = <HTMLDivElement> document.getElementById("alphabets");
     guessArea = <HTMLSpanElement> document.getElementById("guess-area");
+    
+    const buttonStart: HTMLButtonElement = <HTMLButtonElement> document.getElementById("button-start");
+    const buttonReset: HTMLButtonElement = <HTMLButtonElement> document.getElementById("button-reset");
 
     buttonStart.onclick = function(): void {
         startGame();
@@ -64,6 +59,7 @@ function resetGame(): void {
 }
 
 function generateAlphabets(): void {
+    const alphabets: HTMLDivElement = <HTMLDivElement> document.getElementById("alphabets");
     while (alphabets.hasChildNodes()) {
         alphabets.removeChild(alphabets.firstChild);
     }
@@ -100,7 +96,7 @@ function generateGuessArea(): void {
     for (let i = 0; i < word.length; i++) {
         const char: string = word[i];
         const value: number = word.charCodeAt(i);
-        if (value == 32) {
+        if (value === 32) {
             string += " ";
         } else if (table[value - 65]) {
             string += "_";
@@ -110,7 +106,7 @@ function generateGuessArea(): void {
         }
     }
     guessArea.innerText = string;
-    if (unsolved == 0) {
+    if (unsolved === 0) {
         in_game = false;
         alert("You won!");
     }
@@ -123,12 +119,13 @@ function reduceHealth(): void {
 }
 
 function startGame(): void {
+    const wordInput: HTMLInputElement = <HTMLInputElement> document.getElementById("word");
     if (wordInput.value.length < 5) return;
     word = wordInput.value.toUpperCase();
     let length: number = 0;
     for (let i = 0; i < word.length; i++) {
         const value: number = word.charCodeAt(i);
-        if (value == 32) continue;
+        if (value === 32) continue;
         if (value < 65 || value > 90) {
             resetGame();
             return;
