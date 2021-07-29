@@ -1,0 +1,31 @@
+<html>
+    <script src="hangman.js"></script>
+    <head>
+        <title>Hangman</title>
+        <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+        <meta content="utf-8" http-equiv="encoding">
+        <style>
+            .body {
+                font-family: 'Times New Roman', Times, serif;
+            }
+        </style>
+    </head>
+    <body>
+        <h1><a href="../projects.html">Hangman</a></h1>
+        <h3>by Jin Wei</h3>
+        <input type="text" id="word" autofocus maxlength="50">
+        <button id="button-start">Start</button>
+        <br>
+        <img src="pics/1.png" id="display-health">
+        <span id="guess-area" style="font-size: large;"></span>
+        <div id="alphabets" style="font-size: x-large;"></div>
+        <div>
+            <button id="button-toggle-info"><span id="display-toggle-text">Show</span> Info</button>
+            <ul id="display-info">
+                <li>Hangman Game!</li>
+                <li>>= 5 letter words</li>
+                <li>Only accepts A-Z</li>
+            </ul>
+        </div>
+    </body>
+</html>
