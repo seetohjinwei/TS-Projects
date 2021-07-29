@@ -2,12 +2,12 @@ let health: number = 1;  // from 1 - 5 (6 is dead)
 var picture: HTMLImageElement;
 var wordInput: HTMLInputElement;
 var buttonStart: HTMLButtonElement;
+var buttonReset: HTMLButtonElement;
 var alphabets: HTMLDivElement;
 var guessArea: HTMLSpanElement;
 var word: string = "";
-var length: number;
 var in_game: boolean = false;
-var found: boolean[] = [
+var table: boolean[] = [
     false, false, false, false, false, false, false, false, false, false,
     false, false, false, false, false, false, false, false, false, false, 
     false, false, false, false, false, false
@@ -17,11 +17,16 @@ window.onload = function(): void {
     picture = <HTMLImageElement> document.getElementById("display-health");
     wordInput = <HTMLInputElement> document.getElementById("word");
     buttonStart = <HTMLButtonElement> document.getElementById("button-start");
+    buttonReset = <HTMLButtonElement> document.getElementById("button-reset");
     alphabets = <HTMLDivElement> document.getElementById("alphabets");
     guessArea = <HTMLSpanElement> document.getElementById("guess-area");
 
     buttonStart.onclick = function(): void {
         startGame();
+    };
+
+    buttonReset.onclick = function(): void {
+        resetGame();
     };
 
     resetGame();
@@ -46,8 +51,7 @@ function displayInfo(): void {
 function resetGame(): void {
     in_game = false;
     word = "";
-    length = null;
-    found = [
+    table = [
         false, false, false, false, false, false, false, false, false, false,
         false, false, false, false, false, false, false, false, false, false, 
         false, false, false, false, false, false
@@ -67,7 +71,7 @@ function generateAlphabets(): void {
         const char: string = String.fromCharCode(x);
         const span: HTMLSpanElement = document.createElement("span");
         span.innerText = char;
-        span.setAttribute("char", char);
+        span.setAttribute("char", x.toString());
         span.addEventListener("click", charPressed);
         alphabets.appendChild(span);
     }
@@ -76,12 +80,39 @@ function generateAlphabets(): void {
 function charPressed(charPressed): void {
     if (!in_game) return;
     const cell: HTMLSpanElement = charPressed.target;
-    const char: string = cell.getAttribute("char");
+    const index: number = parseInt(cell.getAttribute("char")) - 65;
     cell.hidden = true;
-    reduceHealth()
+    if (table[index]) {
+        table[index] = false;
+        generateGuessArea();
+    } else {
+        reduceHealth();
+    }
     if (health >= 6) {
         in_game = false;
-        return;
+        alert("You lost!")
+    }
+}
+
+function generateGuessArea(): void {
+    let string: string = "";
+    let unsolved: number = 0;
+    for (let i = 0; i < word.length; i++) {
+        const char: string = word[i];
+        const value: number = word.charCodeAt(i);
+        if (value == 32) {
+            string += " ";
+        } else if (table[value - 65]) {
+            string += "_";
+            unsolved++;
+        } else {
+            string += char;
+        }
+    }
+    guessArea.innerText = string;
+    if (unsolved == 0) {
+        in_game = false;
+        alert("You won!");
     }
 }
 
@@ -93,18 +124,24 @@ function reduceHealth(): void {
 
 function startGame(): void {
     if (wordInput.value.length < 5) return;
-    word = wordInput.value.toLowerCase();
-    length = word.length;
-    for (let i = 0; i < length; i++) {
-        const value: number = word.charCodeAt(i) - 97;
-        if (value < 0 || value > 25) {
+    word = wordInput.value.toUpperCase();
+    let length: number = 0;
+    for (let i = 0; i < word.length; i++) {
+        const value: number = word.charCodeAt(i);
+        if (value == 32) continue;
+        if (value < 65 || value > 90) {
             resetGame();
             return;
         }
-        found[value] = true;
+        length++;
+        table[value - 65] = true;
+    }
+    if (length < 5) {
+        resetGame();
+        return;
     }
     in_game = true;
     wordInput.value = "";
     health = 1;
-    guessArea.innerText = "_".repeat(length);
+    generateGuessArea();
 }
