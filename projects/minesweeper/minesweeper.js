@@ -38,9 +38,24 @@ function startGame(difficulty) {
         3: [16, 30, 99]
     };
     _a = table[difficulty], sizeOfRow = _a[0], sizeOfCol = _a[1], totalBombs = _a[2];
-    board = new Array(sizeOfRow);
-    for (var i = 0; i < sizeOfRow; i++) {
-        board[i] = new Array(sizeOfCol).fill(0);
+    var baseCell = document.createElement("td");
+    baseCell.innerText = " ";
+    baseCell.setAttribute("value", "0");
+    board = [];
+    var _loop_1 = function (r) {
+        var row = [];
+        var _loop_2 = function (c) {
+            var cell = baseCell.cloneNode(true);
+            cell.onclick = function () { return cellPressed(r, c); };
+            row.push(cell);
+        };
+        for (var c = 0; c < sizeOfCol; c++) {
+            _loop_2(c);
+        }
+        board.push(row);
+    };
+    for (var r = 0; r < sizeOfRow; r++) {
+        _loop_1(r);
     }
     function randInt(maxValue) {
         return Math.floor(Math.random() * maxValue);
@@ -49,8 +64,10 @@ function startGame(difficulty) {
     while (bombsPlaced < totalBombs) {
         var r = randInt(sizeOfRow);
         var c = randInt(sizeOfCol);
-        if (board[r][c] !== -1) {
-            board[r][c] = -1;
+        var cell = board[r][c];
+        var value = cell.getAttribute("value");
+        if (value !== "-1") {
+            cell.setAttribute("value", "-1");
             bombsPlaced++;
         }
     }
@@ -61,17 +78,19 @@ function startGame(difficulty) {
             for (var c = col - 1; c <= col + 1; c++) {
                 if (c < 0 || c > sizeOfCol - 1)
                     continue;
-                var value = board[r][c];
+                var cell = board[r][c];
+                var value = parseInt(cell.getAttribute("value"));
                 if (value !== -1) {
-                    board[r][c]++;
+                    cell.setAttribute("value", (value + 1).toString());
                 }
             }
         }
     }
     for (var r = 0; r < sizeOfRow; r++) {
         for (var c = 0; c < sizeOfCol; c++) {
-            var value = board[r][c];
-            if (value === -1) {
+            var cell = board[r][c];
+            var value = cell.getAttribute("value");
+            if (value === "-1") {
                 updateHints(r, c);
             }
         }
@@ -85,22 +104,14 @@ function displayBoard() {
     }
     for (var r = 0; r < sizeOfRow; r++) {
         var row = document.createElement("tr");
-        var _loop_1 = function (c) {
-            var cell = document.createElement("td");
-            var value = board[r][c];
-            cell.innerText = " ";
-            cell.setAttribute("value", value.toString());
-            cell.onclick = function () { return cellPressed(cell); };
-            row.appendChild(cell);
-        };
         for (var c = 0; c < sizeOfCol; c++) {
-            _loop_1(c);
+            var cell = board[r][c];
+            row.appendChild(cell);
         }
         playArea.appendChild(row);
     }
 }
 function lostGame() {
-    alert("You lost!");
     in_game = false;
     var playArea = document.getElementById("display-board");
     while (playArea.hasChildNodes()) {
@@ -109,27 +120,29 @@ function lostGame() {
     for (var r = 0; r < sizeOfRow; r++) {
         var row = document.createElement("tr");
         for (var c = 0; c < sizeOfCol; c++) {
-            var cell = document.createElement("td");
-            var value = board[r][c];
-            if (value === -1) {
+            var cell = board[r][c];
+            var value = cell.getAttribute("value");
+            if (value === "-1") {
                 cell.innerHTML = "<img src=\"pics/bomb.png\">";
             }
             else {
-                cell.innerText = value.toString();
+                cell.innerText = value;
             }
             row.appendChild(cell);
         }
         playArea.appendChild(row);
     }
+    alert("You lost!");
 }
-function cellPressed(cell) {
+function cellPressed(row, col) {
     if (!in_game)
         return;
-    var string = cell.getAttribute("value");
-    var value = parseInt(string);
-    if (value === -1) {
+    var cell = board[row][col];
+    var value = cell.getAttribute("value");
+    if (value === "-1") {
         lostGame();
     }
-    else
-        cell.innerText = string;
+    else {
+        cell.innerText = value;
+    }
 }
