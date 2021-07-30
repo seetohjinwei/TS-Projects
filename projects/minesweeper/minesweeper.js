@@ -135,7 +135,7 @@ function displayBoard() {
         playArea.appendChild(row);
     }
 }
-function lostGame() {
+function endGame() {
     in_game = false;
     var playArea = document.getElementById("display-board");
     while (playArea.hasChildNodes()) {
@@ -146,7 +146,10 @@ function lostGame() {
         for (var c = 0; c < sizeOfCol; c++) {
             var cell = board[r][c];
             var value = cell.getAttribute("value");
-            if (value === "-1") {
+            var revealed = cell.getAttribute("revealed") === "true";
+            if (revealed) {
+            }
+            else if (value === "-1") {
                 cell.innerHTML = "<img src=\"pics/bomb.png\">";
             }
             else {
@@ -156,7 +159,6 @@ function lostGame() {
         }
         playArea.appendChild(row);
     }
-    message.innerText = "You lost! :(";
 }
 function cellPressed(row, col) {
     if (!in_game)
@@ -173,21 +175,25 @@ function cellFlag(row, col) {
     displayCurrBombs.innerText = currBombs.toString();
     var cell = board[row][col];
     var value = cell.getAttribute("value");
+    cell.setAttribute("revealed", "true");
     if (value === "-1") {
         bombsFlagged++;
         if (bombsFlagged === totalBombs) {
             message.innerText = "You won! :D";
-            in_game = false;
+            endGame();
         }
     }
     cell.innerHTML = "<img src=\"pics/flag.png\">";
     cell.onclick = function () { return cellUnFlag(row, col); };
 }
 function cellUnFlag(row, col) {
+    if (!in_game)
+        return;
     currBombs++;
     displayCurrBombs.innerText = currBombs.toString();
     var cell = board[row][col];
     var value = cell.getAttribute("value");
+    cell.setAttribute("revealed", "false");
     if (value === "-1") {
         bombsFlagged--;
     }
@@ -198,7 +204,8 @@ function cellReveal(row, col) {
     var cell = board[row][col];
     var value = cell.getAttribute("value");
     if (value === "-1") {
-        lostGame();
+        message.innerText = "You lost! :(";
+        endGame();
     }
     else if (value === "0") {
         revealAroundZeros(row, col);

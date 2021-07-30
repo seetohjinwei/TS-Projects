@@ -142,7 +142,7 @@ function displayBoard(): void {
     }
 }
 
-function lostGame(): void {
+function endGame(): void {
     in_game = false;
     const playArea: HTMLTableElement = <HTMLTableElement> document.getElementById("display-board");
     while (playArea.hasChildNodes()) {
@@ -153,7 +153,10 @@ function lostGame(): void {
         for (let c = 0; c < sizeOfCol; c++) {
             const cell: HTMLTableCellElement = board[r][c];
             const value: string = cell.getAttribute("value");
-            if (value === "-1") {
+            const revealed: boolean = cell.getAttribute("revealed") === "true";
+            if (revealed) {
+                
+            } else if (value === "-1") {
                 cell.innerHTML = `<img src="pics/bomb.png">`;
             } else {
                 cell.innerText = value;
@@ -162,7 +165,6 @@ function lostGame(): void {
         }
         playArea.appendChild(row);
     }
-    message.innerText = "You lost! :(";
 }
 
 function cellPressed(row: number, col: number): void {
@@ -178,11 +180,12 @@ function cellFlag(row: number, col: number): void {
     displayCurrBombs.innerText = currBombs.toString();
     const cell: HTMLTableCellElement = board[row][col];
     const value: string = cell.getAttribute("value");
+    cell.setAttribute("revealed", "true");
     if (value === "-1") {
         bombsFlagged++;
         if (bombsFlagged === totalBombs) {
             message.innerText = "You won! :D";
-            in_game = false;
+            endGame();
         }
     }
     cell.innerHTML = `<img src="pics/flag.png">`;
@@ -190,10 +193,12 @@ function cellFlag(row: number, col: number): void {
 }
 
 function cellUnFlag(row: number, col: number): void {
+    if (!in_game) return;
     currBombs++;
     displayCurrBombs.innerText = currBombs.toString();
     const cell: HTMLTableCellElement = board[row][col];
     const value: string = cell.getAttribute("value");
+    cell.setAttribute("revealed", "false");
     if (value === "-1") {
         bombsFlagged--;
     }
@@ -205,7 +210,8 @@ function cellReveal(row: number, col: number): void {
     const cell: HTMLTableCellElement = board[row][col];
     const value: string = cell.getAttribute("value");
     if (value === "-1") {
-        lostGame();
+        message.innerText = "You lost! :(";
+        endGame();
     } else if (value === "0") {
         revealAroundZeros(row, col);
     } else {
