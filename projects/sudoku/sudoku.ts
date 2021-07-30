@@ -9,11 +9,40 @@ var board: number[][] = [
     [0,0,0,0,0,0,0,0,0],
     [0,0,0,0,0,0,0,0,0]
 ];
+
 const message: HTMLElement = document.getElementById("display-message");
 const buttonSolve: HTMLElement = document.getElementById("button-solve");
 const buttonReset: HTMLElement = document.getElementById("button-reset");
 const display: HTMLElement = document.getElementById("display-board");
 let value: number = null;
+
+const buttonEasy: HTMLElement = document.getElementById("button-easy");
+const buttonMedium: HTMLElement = document.getElementById("button-medium");
+const buttonHard: HTMLElement = document.getElementById("button-hard");
+const buttonValidate: HTMLElement = document.getElementById("button-validate");
+
+buttonValidate.onclick = () => {
+    function solvedBoard(): boolean {
+        // haven't check for box
+        for (let i = 0; i < 9; i++) {
+            const row: Set<number> = new Set();
+            const col: Set<number> = new Set();
+            for (let j = 0; j < 9; j++) {
+                const r: number = board[i][j];
+                const c: number = board[j][i];
+                if (r === 0 || c === 0) return false;
+                row.add(r);
+                col.add(c);
+            }
+            if (row.size !== 9) return false;
+            if (col.size !== 9) return false;
+        }
+        return true;
+    }
+    const valid: boolean = solvedBoard();
+    
+    message.innerText = valid ? "You did it! :D" : "Hmm, seems like there's an error";
+};
 
 window.onload = function (): void {
     updateBoard(true);
@@ -66,7 +95,6 @@ function clickCell(cellPressed): void {
     const cell: HTMLTableDataCellElement = cellPressed.target;
     const row: number = parseInt(cell.getAttribute("row"));
     const col: number = parseInt(cell.getAttribute("col"));
-    let endListen = false;
     function readValue(press: KeyboardEvent): void {
         const value = press.key;
         if (['0','1','2','3','4','5','6','7','8','9'].includes(value)) {
@@ -104,7 +132,7 @@ function displayInfo(): void {
     }
 }
 
-buttonReset.onclick = function(): void {
+buttonReset.onclick = () => {
     board = [
         [0,0,0,0,0,0,0,0,0],
         [0,0,0,0,0,0,0,0,0],
@@ -118,7 +146,7 @@ buttonReset.onclick = function(): void {
     ];
     updateBoard(true);
     message.innerText = "Reset!";
-}
+};
 
 function validBoard(): boolean {
     let count: number = 0;

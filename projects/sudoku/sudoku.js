@@ -14,6 +14,33 @@ var buttonSolve = document.getElementById("button-solve");
 var buttonReset = document.getElementById("button-reset");
 var display = document.getElementById("display-board");
 var value = null;
+var buttonEasy = document.getElementById("button-easy");
+var buttonMedium = document.getElementById("button-medium");
+var buttonHard = document.getElementById("button-hard");
+var buttonValidate = document.getElementById("button-validate");
+buttonValidate.onclick = function () {
+    function solvedBoard() {
+        for (var i = 0; i < 9; i++) {
+            var row = new Set();
+            var col = new Set();
+            for (var j = 0; j < 9; j++) {
+                var r = board[i][j];
+                var c = board[j][i];
+                if (r === 0 || c === 0)
+                    return false;
+                row.add(r);
+                col.add(c);
+            }
+            if (row.size !== 9)
+                return false;
+            if (col.size !== 9)
+                return false;
+        }
+        return true;
+    }
+    var valid = solvedBoard();
+    message.innerText = valid ? "You did it! :D" : "Hmm, seems like there's an error";
+};
 window.onload = function () {
     updateBoard(true);
     displayInfo();
@@ -63,7 +90,6 @@ function clickCell(cellPressed) {
     var cell = cellPressed.target;
     var row = parseInt(cell.getAttribute("row"));
     var col = parseInt(cell.getAttribute("col"));
-    var endListen = false;
     function readValue(press) {
         var value = press.key;
         if (['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'].includes(value)) {
