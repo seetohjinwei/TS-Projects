@@ -29,14 +29,15 @@
     <body>
         <h1><a href="../projects.html">Minesweeper</a></h1>
         <h3>by Jin Wei</h3>
-        <button id="button-easy">Easy</button>
+        <button id="button-small">Small</button>
         <button id="button-medium">Medium</button>
-        <button id="button-hard">Hard</button>
+        <button id="button-large">Large</button>
         <br><br>
+        <div id="display-message"><br></div>
         <div>
             Bombs: <span id="display-curr-bombs">0</span>/<span id="display-total-bombs">0</span>
         </div>
-        <button id="button-flag">Flag</button>
+        <button id="button-flag">Flag <span id="display-flag-mode">Off</span></button>
         <table>
             <tbody id="display-board"></tbody>
         </table>
@@ -44,9 +45,11 @@
         <div>
             <button id="button-toggle-info"><span id="display-toggle-text">Show</span> Info</button>
             <ul id="display-info">
-                <li>Easy - 8 * 8, 10 bombs</li>
+                <li>Press Flag Button or "F" on keyboard to toggle FlagMode</li>
+                <li>Flag all bombs to win!</li>
+                <li>Small - 8 * 8, 10 bombs</li>
                 <li>Medium - 16 * 16, 40 bombs</li>
-                <li>Hard - 30 * 16, 99 bombs</li>
+                <li>Large - 30 * 16, 99 bombs</li>
             </ul>
         </div>
     </body>

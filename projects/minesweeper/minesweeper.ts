@@ -4,18 +4,40 @@ var board: HTMLTableCellElement[][] = [];
 var sizeOfRow: number = 0;
 var sizeOfCol: number = 0;
 var totalBombs: number = 0;
-var currBombs: number = 0;
+var currBombs: number = 0; // displayed value that simply shows number of flags (real or not)
+var bombsFlagged: number = 0; // hidden value that tracks actual bombs that are flagged
+var displayCurrBombs: HTMLSpanElement;
 var flagMode: boolean = false;
 var in_game: boolean = false;
+var message: HTMLDivElement;
 
 window.onload = (): void => {
-    const buttonEasy: HTMLButtonElement = <HTMLButtonElement> document.getElementById("button-easy");
+    const buttonSmall: HTMLButtonElement = <HTMLButtonElement> document.getElementById("button-small");
     const buttonMedium: HTMLButtonElement = <HTMLButtonElement> document.getElementById("button-medium");
-    const buttonHard: HTMLButtonElement = <HTMLButtonElement> document.getElementById("button-hard");
+    const buttonLarge: HTMLButtonElement = <HTMLButtonElement> document.getElementById("button-large");
 
-    buttonEasy.onclick = () => startGame(1);
+    buttonSmall.onclick = () => startGame(1);
     buttonMedium.onclick = () => startGame(2);
-    buttonHard.onclick = () => startGame(3);
+    buttonLarge.onclick = () => startGame(3);
+
+    const displayFlagMode: HTMLSpanElement = <HTMLSpanElement> document.getElementById("display-flag-mode");
+    const buttonFlag: HTMLButtonElement = <HTMLButtonElement> document.getElementById("button-flag");
+
+    buttonFlag.onclick = () => toggleFlagMode();
+    
+    function toggleFlagMode(): void {
+        flagMode = !flagMode;
+        displayFlagMode.innerText = (flagMode) ? "On" : "Off";
+    }
+    
+    document.addEventListener("keypress", (press) => {
+        const value: string = press.key;
+        if (value == "f") toggleFlagMode();
+    });
+
+    displayCurrBombs = <HTMLSpanElement> document.getElementById("display-curr-bombs");
+
+    message = <HTMLDivElement> document.getElementById("display-message");
 
     displayInfo();
 };
@@ -37,6 +59,8 @@ function displayInfo(): void {
 
 function startGame(difficulty: number): void {
     in_game = true;
+    bombsFlagged = 0;
+    message.innerText = "Good Luck!";
     const table: {[difficulty: number]: number[]} = {
         1: [8, 8, 10],
         2: [16, 16, 40],
@@ -47,6 +71,7 @@ function startGame(difficulty: number): void {
     const baseCell: HTMLTableCellElement = document.createElement("td");
     baseCell.innerText = " ";
     baseCell.setAttribute("value", "0");
+    baseCell.setAttribute("revealed", "false");
     board = [];
     for (let r = 0; r < sizeOfRow; r++) {
         const row: HTMLTableCellElement[] = [];
@@ -75,9 +100,9 @@ function startGame(difficulty: number): void {
     // generate hints
     function updateHints(row: number, col: number): void {
         for (let r = row - 1; r <= row + 1; r++) {
-            if (r < 0 || r > sizeOfRow - 1) continue;
             for (let c = col - 1; c <= col + 1; c++) {
-                if (c < 0 || c > sizeOfCol - 1) continue;
+                if (r == row && c == col) continue;
+                if (r < 0 || r >= sizeOfRow || c < 0 || c >= sizeOfCol) continue;
                 const cell: HTMLTableCellElement = board[r][c];
                 const value: number = parseInt(cell.getAttribute("value"));
                 if (value !== -1) {
@@ -95,6 +120,10 @@ function startGame(difficulty: number): void {
             }
         }
     }
+    const displayTotalBombs: HTMLSpanElement = <HTMLSpanElement> document.getElementById("display-total-bombs");
+    displayTotalBombs.innerText = totalBombs.toString();
+    currBombs = totalBombs;
+    displayCurrBombs.innerText = currBombs.toString();
     displayBoard();
 }
 
@@ -133,16 +162,84 @@ function lostGame(): void {
         }
         playArea.appendChild(row);
     }
-    alert("You lost!");
+    message.innerText = "You lost! :(";
 }
 
 function cellPressed(row: number, col: number): void {
     if (!in_game) return;
     const cell: HTMLTableCellElement = board[row][col];
+    cell.onclick = () => {};
+    if (flagMode) cellFlag(row, col);
+    else cellReveal(row, col);
+}
+
+function cellFlag(row: number, col: number): void {
+    currBombs--;
+    displayCurrBombs.innerText = currBombs.toString();
+    const cell: HTMLTableCellElement = board[row][col];
+    const value: string = cell.getAttribute("value");
+    if (value === "-1") {
+        bombsFlagged++;
+        if (bombsFlagged === totalBombs) {
+            message.innerText = "You won! :D";
+            in_game = false;
+        }
+    }
+    cell.innerHTML = `<img src="pics/flag.png">`;
+    cell.onclick = () => cellUnFlag(row, col);
+}
+
+function cellUnFlag(row: number, col: number): void {
+    currBombs++;
+    displayCurrBombs.innerText = currBombs.toString();
+    const cell: HTMLTableCellElement = board[row][col];
+    const value: string = cell.getAttribute("value");
+    if (value === "-1") {
+        bombsFlagged--;
+    }
+    cell.innerHTML = "";
+    cell.onclick = () => cellPressed(row, col);
+}
+
+function cellReveal(row: number, col: number): void {
+    const cell: HTMLTableCellElement = board[row][col];
     const value: string = cell.getAttribute("value");
     if (value === "-1") {
         lostGame();
+    } else if (value === "0") {
+        revealAroundZeros(row, col);
     } else {
         cell.innerText = value;
+    }
+}
+
+function revealAroundZeros(row: number, col: number): void {
+    const cell: HTMLTableCellElement = board[row][col];
+    const value: string = cell.getAttribute("value");
+
+    cell.innerText = value;
+    cell.setAttribute("revealed", "true");
+    cell.onclick = () => {};
+
+    function revealNext(row: number, col: number): void {
+        const cellNext: HTMLTableCellElement = board[row][col];
+        const valueNext: string = cellNext.getAttribute("value");
+        const revealedNext: boolean = cellNext.getAttribute("revealed") === "true";
+        
+        if (valueNext === "0" && !revealedNext) {
+            revealAroundZeros(row, col);
+        }
+        else {
+            cellNext.innerText = valueNext;
+            cellNext.setAttribute("revealed", "true");
+            cellNext.onclick = () => {};
+        }
+    }
+
+    for (let r = row - 1; r <= row + 1; r++) {
+        for (let c = col - 1; c <= col + 1; c++) {
+            if (r === row && c === col) continue;
+            if (r >= 0 && r < sizeOfRow && c >= 0 && c < sizeOfCol) revealNext(r, c);
+        }
     }
 }
