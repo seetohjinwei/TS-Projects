@@ -3,11 +3,8 @@ var picture: HTMLImageElement;
 var guessArea: HTMLSpanElement;
 var word: string = "";
 var in_game: boolean = false;
-var table: boolean[] = [
-    false, false, false, false, false, false, false, false, false, false,
-    false, false, false, false, false, false, false, false, false, false, 
-    false, false, false, false, false, false
-];  // length of 26, 1 for each char
+var table: HTMLSpanElement[] = [];  // length of 26, 1 for each char
+var message: HTMLDivElement;
 
 window.onload = function(): void {
     picture = <HTMLImageElement> document.getElementById("display-health");
@@ -16,13 +13,17 @@ window.onload = function(): void {
     const buttonStart: HTMLButtonElement = <HTMLButtonElement> document.getElementById("button-start");
     const buttonReset: HTMLButtonElement = <HTMLButtonElement> document.getElementById("button-reset");
 
-    buttonStart.onclick = function(): void {
-        startGame();
-    };
+    buttonStart.onclick = () => startGame();
+    buttonReset.onclick = () => resetGame();
 
-    buttonReset.onclick = function(): void {
-        resetGame();
-    };
+    document.addEventListener("keypress", (press) => {
+        const value: string = press.key.toUpperCase();
+        const ascii: number = value.charCodeAt(0);
+        if (value === "ENTER") startGame();
+        else if (ascii >= 65 && ascii <= 90) alphabetPressed(ascii - 65);
+    });
+
+    message = <HTMLDivElement> document.getElementById("display-message");
 
     resetGame();
     displayInfo();
@@ -32,7 +33,7 @@ function displayInfo(): void {
     const infoDisplay: HTMLUListElement = <HTMLUListElement> document.getElementById("display-info");
     const toggleInfo: HTMLSpanElement = <HTMLSpanElement> document.getElementById("display-toggle-text");
     infoDisplay.style.display = "none";
-    document.getElementById("button-toggle-info").onclick = function(): void {
+    document.getElementById("button-toggle-info").onclick = () => {
         if (toggleInfo.innerHTML === "Show") {
             toggleInfo.innerText = "Hide";
             infoDisplay.style.display = "block";
@@ -40,17 +41,12 @@ function displayInfo(): void {
             toggleInfo.innerText = "Show";
             infoDisplay.style.display = "none";
         }
-    }
+    };
 }
 
 function resetGame(): void {
     in_game = false;
     word = "";
-    table = [
-        false, false, false, false, false, false, false, false, false, false,
-        false, false, false, false, false, false, false, false, false, false, 
-        false, false, false, false, false, false
-    ];
     guessArea.innerText = "";
     health = 1;
     picture.src = "pics/1.png";
@@ -60,32 +56,38 @@ function resetGame(): void {
 
 function generateAlphabets(): void {
     const alphabets: HTMLDivElement = <HTMLDivElement> document.getElementById("alphabets");
+    table = [];
     while (alphabets.hasChildNodes()) {
         alphabets.removeChild(alphabets.firstChild);
     }
     for (let x = 65; x <= 90; x++) {
-        const char: string = String.fromCharCode(x);
         const span: HTMLSpanElement = document.createElement("span");
+        const char: string = String.fromCharCode(x);
+        const index: number = x - 65;
         span.innerText = char;
         span.setAttribute("char", x.toString());
-        span.onclick = () => cellPressed(span);
+        span.setAttribute("toBeFound", "false");
+        span.onclick = () => alphabetPressed(index);
+
+        table.push(span);
         alphabets.appendChild(span);
     }
 }
 
-function cellPressed(cell: HTMLSpanElement): void {
+function alphabetPressed(index: number): void {
     if (!in_game) return;
-    const index: number = parseInt(cell.getAttribute("char")) - 65;
+    const cell: HTMLSpanElement = table[index];
+    const toBeFound: boolean = cell.getAttribute("toBeFound") === "true";
     cell.hidden = true;
-    if (table[index]) {
-        table[index] = false;
+    if (toBeFound) {
+        cell.setAttribute("toBeFound", "false");
         generateGuessArea();
     } else {
         reduceHealth();
     }
     if (health >= 6) {
         in_game = false;
-        alert("You lost!")
+        message.innerText = "You lost! :(";
     }
 }
 
@@ -97,7 +99,11 @@ function generateGuessArea(): void {
         const value: number = word.charCodeAt(i);
         if (value === 32) {
             string += " ";
-        } else if (table[value - 65]) {
+            continue;
+        }
+        const cell: HTMLSpanElement = table[value - 65];
+        const toBeFound: boolean = cell.getAttribute("toBeFound") === "true";
+        if (toBeFound) {
             string += "_";
             unsolved++;
         } else {
@@ -107,7 +113,7 @@ function generateGuessArea(): void {
     guessArea.innerText = string;
     if (unsolved === 0) {
         in_game = false;
-        alert("You won!");
+        message.innerText = "You won! :D";
     }
 }
 
@@ -119,7 +125,12 @@ function reduceHealth(): void {
 
 function startGame(): void {
     const wordInput: HTMLInputElement = <HTMLInputElement> document.getElementById("word");
-    if (wordInput.value.length < 5) return;
+    if (wordInput.value.length < 5) {
+        message.innerText = "Word must have >= 5 characters";
+        return;
+    }
+    wordInput.blur();
+    message.innerText = "Good luck!";
     word = wordInput.value.toUpperCase();
     let length: number = 0;
     for (let i = 0; i < word.length; i++) {
@@ -130,7 +141,7 @@ function startGame(): void {
             return;
         }
         length++;
-        table[value - 65] = true;
+        table[value - 65].setAttribute("toBeFound", "true");
     }
     if (length < 5) {
         resetGame();

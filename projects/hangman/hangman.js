@@ -3,22 +3,24 @@ var picture;
 var guessArea;
 var word = "";
 var in_game = false;
-var table = [
-    false, false, false, false, false, false, false, false, false, false,
-    false, false, false, false, false, false, false, false, false, false,
-    false, false, false, false, false, false
-];
+var table = [];
+var message;
 window.onload = function () {
     picture = document.getElementById("display-health");
     guessArea = document.getElementById("guess-area");
     var buttonStart = document.getElementById("button-start");
     var buttonReset = document.getElementById("button-reset");
-    buttonStart.onclick = function () {
-        startGame();
-    };
-    buttonReset.onclick = function () {
-        resetGame();
-    };
+    buttonStart.onclick = function () { return startGame(); };
+    buttonReset.onclick = function () { return resetGame(); };
+    document.addEventListener("keypress", function (press) {
+        var value = press.key.toUpperCase();
+        var ascii = value.charCodeAt(0);
+        if (value === "ENTER")
+            startGame();
+        else if (ascii >= 65 && ascii <= 90)
+            alphabetPressed(ascii - 65);
+    });
+    message = document.getElementById("display-message");
     resetGame();
     displayInfo();
 };
@@ -40,11 +42,6 @@ function displayInfo() {
 function resetGame() {
     in_game = false;
     word = "";
-    table = [
-        false, false, false, false, false, false, false, false, false, false,
-        false, false, false, false, false, false, false, false, false, false,
-        false, false, false, false, false, false
-    ];
     guessArea.innerText = "";
     health = 1;
     picture.src = "pics/1.png";
@@ -52,28 +49,33 @@ function resetGame() {
 }
 function generateAlphabets() {
     var alphabets = document.getElementById("alphabets");
+    table = [];
     while (alphabets.hasChildNodes()) {
         alphabets.removeChild(alphabets.firstChild);
     }
     var _loop_1 = function (x) {
-        var char = String.fromCharCode(x);
         var span = document.createElement("span");
+        var char = String.fromCharCode(x);
+        var index = x - 65;
         span.innerText = char;
         span.setAttribute("char", x.toString());
-        span.onclick = function () { return cellPressed(span); };
+        span.setAttribute("toBeFound", "false");
+        span.onclick = function () { return alphabetPressed(index); };
+        table.push(span);
         alphabets.appendChild(span);
     };
     for (var x = 65; x <= 90; x++) {
         _loop_1(x);
     }
 }
-function cellPressed(cell) {
+function alphabetPressed(index) {
     if (!in_game)
         return;
-    var index = parseInt(cell.getAttribute("char")) - 65;
+    var cell = table[index];
+    var toBeFound = cell.getAttribute("toBeFound") === "true";
     cell.hidden = true;
-    if (table[index]) {
-        table[index] = false;
+    if (toBeFound) {
+        cell.setAttribute("toBeFound", "false");
         generateGuessArea();
     }
     else {
@@ -81,7 +83,7 @@ function cellPressed(cell) {
     }
     if (health >= 6) {
         in_game = false;
-        alert("You lost!");
+        message.innerText = "You lost! :(";
     }
 }
 function generateGuessArea() {
@@ -92,8 +94,11 @@ function generateGuessArea() {
         var value = word.charCodeAt(i);
         if (value === 32) {
             string += " ";
+            continue;
         }
-        else if (table[value - 65]) {
+        var cell = table[value - 65];
+        var toBeFound = cell.getAttribute("toBeFound") === "true";
+        if (toBeFound) {
             string += "_";
             unsolved++;
         }
@@ -104,7 +109,7 @@ function generateGuessArea() {
     guessArea.innerText = string;
     if (unsolved === 0) {
         in_game = false;
-        alert("You won!");
+        message.innerText = "You won! :D";
     }
 }
 function reduceHealth() {
@@ -115,8 +120,12 @@ function reduceHealth() {
 }
 function startGame() {
     var wordInput = document.getElementById("word");
-    if (wordInput.value.length < 5)
+    if (wordInput.value.length < 5) {
+        message.innerText = "Word must have >= 5 characters";
         return;
+    }
+    wordInput.blur();
+    message.innerText = "Good luck!";
     word = wordInput.value.toUpperCase();
     var length = 0;
     for (var i = 0; i < word.length; i++) {
@@ -128,7 +137,7 @@ function startGame() {
             return;
         }
         length++;
-        table[value - 65] = true;
+        table[value - 65].setAttribute("toBeFound", "true");
     }
     if (length < 5) {
         resetGame();
