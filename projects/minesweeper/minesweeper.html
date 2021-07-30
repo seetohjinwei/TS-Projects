@@ -1,0 +1,53 @@
+<html>
+    <script src="minesweeper.js"></script>
+    <head>
+        <title>Minesweeper</title>
+        <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+        <meta content="utf-8" http-equiv="encoding">
+        <style>
+            .body {
+                font-family: 'Times New Roman', Times, serif;
+            }
+            table {
+                border-collapse: collapse;
+                table-layout: fixed;
+                width: 280px;
+            }
+            tbody {
+                border: solid medium black;
+            }
+            td {
+                border: solid thin black;
+                text-align: center;
+                vertical-align: middle;
+                width: 30px;
+                height: 30px;
+                overflow: hidden;
+            }
+        </style>
+    </head>
+    <body>
+        <h1><a href="../projects.html">Minesweeper</a></h1>
+        <h3>by Jin Wei</h3>
+        <button id="button-easy">Easy</button>
+        <button id="button-medium">Medium</button>
+        <button id="button-hard">Hard</button>
+        <br><br>
+        <div>
+            Bombs: <span id="display-curr-bombs">0</span>/<span id="display-total-bombs">0</span>
+        </div>
+        <button id="button-flag">Flag</button>
+        <table>
+            <tbody id="display-board"></tbody>
+        </table>
+        <br>
+        <div>
+            <button id="button-toggle-info"><span id="display-toggle-text">Show</span> Info</button>
+            <ul id="display-info">
+                <li>Easy - 8 * 8, 10 bombs</li>
+                <li>Medium - 16 * 16, 40 bombs</li>
+                <li>Hard - 30 * 16, 99 bombs</li>
+            </ul>
+        </div>
+    </body>
+</html>

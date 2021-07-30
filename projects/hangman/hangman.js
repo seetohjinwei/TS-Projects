@@ -55,19 +55,21 @@ function generateAlphabets() {
     while (alphabets.hasChildNodes()) {
         alphabets.removeChild(alphabets.firstChild);
     }
-    for (var x = 65; x <= 90; x++) {
+    var _loop_1 = function (x) {
         var char = String.fromCharCode(x);
         var span = document.createElement("span");
         span.innerText = char;
         span.setAttribute("char", x.toString());
-        span.addEventListener("click", charPressed);
+        span.onclick = function () { return cellPressed(span); };
         alphabets.appendChild(span);
+    };
+    for (var x = 65; x <= 90; x++) {
+        _loop_1(x);
     }
 }
-function charPressed(charPressed) {
+function cellPressed(cell) {
     if (!in_game)
         return;
-    var cell = charPressed.target;
     var index = parseInt(cell.getAttribute("char")) - 65;
     cell.hidden = true;
     if (table[index]) {

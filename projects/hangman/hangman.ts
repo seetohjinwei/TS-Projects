@@ -1,4 +1,4 @@
-let health: number = 1;  // from 1 - 5 (6 is dead)
+var health: number = 1;  // from 1 - 5 (6 is dead)
 var picture: HTMLImageElement;
 var guessArea: HTMLSpanElement;
 var word: string = "";
@@ -68,14 +68,13 @@ function generateAlphabets(): void {
         const span: HTMLSpanElement = document.createElement("span");
         span.innerText = char;
         span.setAttribute("char", x.toString());
-        span.addEventListener("click", charPressed);
+        span.onclick = () => cellPressed(span);
         alphabets.appendChild(span);
     }
 }
 
-function charPressed(charPressed): void {
+function cellPressed(cell: HTMLSpanElement): void {
     if (!in_game) return;
-    const cell: HTMLSpanElement = charPressed.target;
     const index: number = parseInt(cell.getAttribute("char")) - 65;
     cell.hidden = true;
     if (table[index]) {
