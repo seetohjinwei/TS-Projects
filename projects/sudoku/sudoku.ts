@@ -10,6 +10,9 @@ var board: number[][] = [
     [0,0,0,0,0,0,0,0,0]
 ];
 
+var selectorsArray: HTMLTableDataCellElement[] = [];
+var cellsSelected: HTMLTableDataCellElement[] = [];
+
 const message: HTMLElement = document.getElementById("display-message");
 const buttonSolve: HTMLElement = document.getElementById("button-solve");
 const buttonReset: HTMLElement = document.getElementById("button-reset");
@@ -44,12 +47,37 @@ buttonValidate.onclick = () => {
     message.innerText = valid ? "You did it! :D" : "Hmm, seems like there's an error";
 };
 
-window.onload = function (): void {
-    updateBoard(true);
+window.onload = () => {
+    updateBoard();
+    displaySelectors(true);
     displayInfo();
+
+    document.addEventListener("keypress", (press: KeyboardEvent) => {
+        const value: string = press.key.toUpperCase();
+        handleKeyPress(value);
+    });
+};
+
+function handleKeyPress(value: string): void {
+    if (!['E','0','1','2','3','4','5','6','7','8','9'].includes(value)) return;
+    // E === 0 in our use case here
+    if (cellsSelected.length === 0) {
+        if (value === "0") value = "E";
+        clickSelector(value);
+    } else {
+        if (value === "E") value = "0";
+        cellsSelected.forEach((cell: HTMLTableDataCellElement) => {
+            cell.style.backgroundColor = "";
+            const row: number = parseInt(cell.getAttribute("row"));
+            const col: number = parseInt(cell.getAttribute("col"));
+            board[row][col] = parseInt(value);
+            cell.innerText = (value === "0") ? "" : value;
+        });
+        cellsSelected = [];
+    }
 }
 
-function updateBoard(displayInput: boolean): void {
+function updateBoard(): void {
     while (display.hasChildNodes()) {
         display.removeChild(display.firstChild);
     }
@@ -62,59 +90,82 @@ function updateBoard(displayInput: boolean): void {
             td.innerText = displayedValue;
             td.setAttribute("row", i.toString());
             td.setAttribute("col", j.toString());
-            td.addEventListener('click', clickCell);
+            td.onclick = () => clickCell(td);
 
             tr.appendChild(td);
-        }
-        if (displayInput) {
-            tr.appendChild(document.createElement("td"));
-            const td_value: HTMLTableDataCellElement = document.createElement("td");
-            td_value.innerText = (i + 1).toString();
-            td_value.setAttribute("value", (i + 1).toString());
-            td_value.addEventListener('click', clickValue);
-            tr.appendChild(td_value);
-            if (i === 0) {
-                const td_value: HTMLTableDataCellElement = document.createElement("td");
-                td_value.innerText = "C";
-                td_value.setAttribute("value", "C");
-                td_value.addEventListener('click', clickValue);
-                tr.appendChild(td_value);
-            } else if (i === 1) {
-                const td_value: HTMLTableDataCellElement = document.createElement("td");
-                td_value.innerText = "0";
-                td_value.setAttribute("value", "0");
-                td_value.addEventListener('click', clickValue);
-                tr.appendChild(td_value);
-            }
         }
         display.appendChild(tr);
     }
 }
 
-function clickCell(cellPressed): void {
-    const cell: HTMLTableDataCellElement = cellPressed.target;
-    const row: number = parseInt(cell.getAttribute("row"));
-    const col: number = parseInt(cell.getAttribute("col"));
-    function readValue(press: KeyboardEvent): void {
-        const value = press.key;
-        if (['0','1','2','3','4','5','6','7','8','9'].includes(value)) {
-            let key: number = parseInt(value);
-            board[row][col] = key;
-            cell.innerText = (key === 0) ? "" : key.toString();
-            document.removeEventListener('keydown', readValue);
-        }
+function displaySelectors(show: boolean): void {
+    const selectors: HTMLElement = document.getElementById("display-selectors");
+    while (selectors.hasChildNodes()) {
+        selectors.removeChild(selectors.firstChild);
     }
-    if (value === null) document.addEventListener('keydown', readValue);
-    else {
+    selectorsArray = [];
+    if (!show) return;
+    const tr: HTMLTableRowElement = document.createElement("tr");
+
+    function makeTD(value: string): HTMLTableDataCellElement {
+        const td: HTMLTableDataCellElement = document.createElement("td");
+        td.innerText = value;
+        td.setAttribute("value", value);
+        td.setAttribute("selected", "false");
+        td.onclick = () => clickSelector(value);
+        return td;
+    }
+
+    for (let i = 1; i <= 9; i++) {
+        const td: HTMLTableDataCellElement = makeTD(i.toString());
+        tr.appendChild(td);
+        selectorsArray.push(td);
+    }
+    const td: HTMLTableDataCellElement = makeTD("E");
+    tr.appendChild(td);
+    selectorsArray.push(td);
+    selectors.appendChild(tr);
+}
+
+function clickCell(cell: HTMLTableDataCellElement): void {
+    if (value !==  null) {
+        const row: number = parseInt(cell.getAttribute("row"));
+        const col: number = parseInt(cell.getAttribute("col"));
         board[row][col] = value;
         cell.innerText = (value === 0) ? "" : value.toString();
+    } else {
+        const index: number = cellsSelected.indexOf(cell);
+        if (index !== -1) {
+            cell.style.backgroundColor = "";
+            cellsSelected.splice(index, 1);
+        } else {
+            cell.style.backgroundColor = "#00B3B3";
+            cellsSelected.push(cell);
+        }
     }
 }
 
-function clickValue(cellPressed): void {
-    const cell: HTMLTableDataCellElement = cellPressed.target;
-    const input: string = cell.getAttribute("value");
-    value = (input === "C") ? null : parseInt(input);
+function clickSelector(string: string): void {
+    if (cellsSelected.length !== 0) {
+        handleKeyPress(string);
+        return;
+    }
+    const index: number = (string === "E") ? 9 : parseInt(string) - 1;
+    const cell: HTMLTableDataCellElement = selectorsArray[index];
+    const selected: boolean = cell.getAttribute("selected") === "true";
+    if (selected) {
+        cell.setAttribute("selected", "false");
+        cell.style.backgroundColor = "#FFFFFF00";
+        value = null;
+    } else {
+        selectorsArray.forEach((cell) => {
+            cell.setAttribute("selected", "false");
+            cell.style.backgroundColor = "";
+        });
+        cell.setAttribute("selected", "true");
+        cell.style.backgroundColor = "#00B3B3";
+        value = (string === "E") ? 0 : parseInt(string);
+    }
 }
 
 function displayInfo(): void {
@@ -144,7 +195,8 @@ buttonReset.onclick = () => {
         [0,0,0,0,0,0,0,0,0],
         [0,0,0,0,0,0,0,0,0]
     ];
-    updateBoard(true);
+    updateBoard();
+    displaySelectors(true);
     message.innerText = "Reset!";
 };
 
@@ -183,7 +235,8 @@ function solve(): void {
             }
         }
     }
-    updateBoard(false);
+    updateBoard();
+    displaySelectors(false);
 }
 
 function validPos(r: number, c: number, value: number): boolean {
@@ -208,3 +261,33 @@ buttonSolve.onclick = function(): void {
     solve();
     message.innerText = "Solved!";
 }
+
+/* used for debugging
+UNSOLVED:
+
+board = [
+[0,0,0,0,0,0,0,0,0],
+[0,0,2,0,1,0,0,9,0],
+[0,0,5,0,0,0,7,0,6],
+[0,0,0,1,0,0,9,6,3],
+[0,3,0,0,2,5,1,0,0],
+[0,7,0,4,0,6,5,0,0],
+[9,6,3,0,0,0,0,0,0],
+[0,0,0,0,6,0,0,3,0],
+[0,4,0,0,0,8,0,7,0]
+];
+
+SOLVED:
+
+board = [
+[3,9,6,5,7,2,8,1,4],
+[7,8,2,6,1,4,3,9,5],
+[4,1,5,8,9,3,7,2,6],
+[5,2,4,1,8,7,9,6,3],
+[6,3,8,9,2,5,1,4,7],
+[1,7,9,4,3,6,5,8,2],
+[9,6,3,7,4,1,2,5,8],
+[8,5,7,2,6,9,4,3,1],
+[2,4,1,3,5,8,6,7,9]
+];
+*/

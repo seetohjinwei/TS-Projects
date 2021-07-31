@@ -9,6 +9,8 @@ var board = [
     [0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0]
 ];
+var selectorsArray = [];
+var cellsSelected = [];
 var message = document.getElementById("display-message");
 var buttonSolve = document.getElementById("button-solve");
 var buttonReset = document.getElementById("button-reset");
@@ -42,74 +44,125 @@ buttonValidate.onclick = function () {
     message.innerText = valid ? "You did it! :D" : "Hmm, seems like there's an error";
 };
 window.onload = function () {
-    updateBoard(true);
+    updateBoard();
+    displaySelectors(true);
     displayInfo();
+    document.addEventListener("keypress", function (press) {
+        var value = press.key.toUpperCase();
+        handleKeyPress(value);
+    });
 };
-function updateBoard(displayInput) {
+function handleKeyPress(value) {
+    if (!['E', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'].includes(value))
+        return;
+    if (cellsSelected.length === 0) {
+        if (value === "0")
+            value = "E";
+        clickSelector(value);
+    }
+    else {
+        if (value === "E")
+            value = "0";
+        cellsSelected.forEach(function (cell) {
+            cell.style.backgroundColor = "";
+            var row = parseInt(cell.getAttribute("row"));
+            var col = parseInt(cell.getAttribute("col"));
+            board[row][col] = parseInt(value);
+            cell.innerText = (value === "0") ? "" : value;
+        });
+        cellsSelected = [];
+    }
+}
+function updateBoard() {
     while (display.hasChildNodes()) {
         display.removeChild(display.firstChild);
     }
     for (var i = 0; i < 9; i++) {
         var tr = document.createElement("tr");
-        for (var j = 0; j < 9; j++) {
+        var _loop_1 = function (j) {
             var td = document.createElement("td");
             var value_1 = board[i][j];
             var displayedValue = (value_1 === 0) ? "" : value_1.toString();
             td.innerText = displayedValue;
             td.setAttribute("row", i.toString());
             td.setAttribute("col", j.toString());
-            td.addEventListener('click', clickCell);
+            td.onclick = function () { return clickCell(td); };
             tr.appendChild(td);
-        }
-        if (displayInput) {
-            tr.appendChild(document.createElement("td"));
-            var td_value = document.createElement("td");
-            td_value.innerText = (i + 1).toString();
-            td_value.setAttribute("value", (i + 1).toString());
-            td_value.addEventListener('click', clickValue);
-            tr.appendChild(td_value);
-            if (i === 0) {
-                var td_value_1 = document.createElement("td");
-                td_value_1.innerText = "C";
-                td_value_1.setAttribute("value", "C");
-                td_value_1.addEventListener('click', clickValue);
-                tr.appendChild(td_value_1);
-            }
-            else if (i === 1) {
-                var td_value_2 = document.createElement("td");
-                td_value_2.innerText = "0";
-                td_value_2.setAttribute("value", "0");
-                td_value_2.addEventListener('click', clickValue);
-                tr.appendChild(td_value_2);
-            }
+        };
+        for (var j = 0; j < 9; j++) {
+            _loop_1(j);
         }
         display.appendChild(tr);
     }
 }
-function clickCell(cellPressed) {
-    var cell = cellPressed.target;
-    var row = parseInt(cell.getAttribute("row"));
-    var col = parseInt(cell.getAttribute("col"));
-    function readValue(press) {
-        var value = press.key;
-        if (['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'].includes(value)) {
-            var key = parseInt(value);
-            board[row][col] = key;
-            cell.innerText = (key === 0) ? "" : key.toString();
-            document.removeEventListener('keydown', readValue);
-        }
+function displaySelectors(show) {
+    var selectors = document.getElementById("display-selectors");
+    while (selectors.hasChildNodes()) {
+        selectors.removeChild(selectors.firstChild);
     }
-    if (value === null)
-        document.addEventListener('keydown', readValue);
-    else {
+    selectorsArray = [];
+    if (!show)
+        return;
+    var tr = document.createElement("tr");
+    function makeTD(value) {
+        var td = document.createElement("td");
+        td.innerText = value;
+        td.setAttribute("value", value);
+        td.setAttribute("selected", "false");
+        td.onclick = function () { return clickSelector(value); };
+        return td;
+    }
+    for (var i = 1; i <= 9; i++) {
+        var td_1 = makeTD(i.toString());
+        tr.appendChild(td_1);
+        selectorsArray.push(td_1);
+    }
+    var td = makeTD("E");
+    tr.appendChild(td);
+    selectorsArray.push(td);
+    selectors.appendChild(tr);
+}
+function clickCell(cell) {
+    if (value !== null) {
+        var row = parseInt(cell.getAttribute("row"));
+        var col = parseInt(cell.getAttribute("col"));
         board[row][col] = value;
         cell.innerText = (value === 0) ? "" : value.toString();
     }
+    else {
+        var index = cellsSelected.indexOf(cell);
+        if (index !== -1) {
+            cell.style.backgroundColor = "";
+            cellsSelected.splice(index, 1);
+        }
+        else {
+            cell.style.backgroundColor = "#00B3B3";
+            cellsSelected.push(cell);
+        }
+    }
 }
-function clickValue(cellPressed) {
-    var cell = cellPressed.target;
-    var input = cell.getAttribute("value");
-    value = (input === "C") ? null : parseInt(input);
+function clickSelector(string) {
+    if (cellsSelected.length !== 0) {
+        handleKeyPress(string);
+        return;
+    }
+    var index = (string === "E") ? 9 : parseInt(string) - 1;
+    var cell = selectorsArray[index];
+    var selected = cell.getAttribute("selected") === "true";
+    if (selected) {
+        cell.setAttribute("selected", "false");
+        cell.style.backgroundColor = "#FFFFFF00";
+        value = null;
+    }
+    else {
+        selectorsArray.forEach(function (cell) {
+            cell.setAttribute("selected", "false");
+            cell.style.backgroundColor = "";
+        });
+        cell.setAttribute("selected", "true");
+        cell.style.backgroundColor = "#00B3B3";
+        value = (string === "E") ? 0 : parseInt(string);
+    }
 }
 function displayInfo() {
     var infoDisplay = document.getElementById("display-info");
@@ -138,7 +191,8 @@ buttonReset.onclick = function () {
         [0, 0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0, 0]
     ];
-    updateBoard(true);
+    updateBoard();
+    displaySelectors(true);
     message.innerText = "Reset!";
 };
 function validBoard() {
@@ -175,7 +229,8 @@ function solve() {
             }
         }
     }
-    updateBoard(false);
+    updateBoard();
+    displaySelectors(false);
 }
 function validPos(r, c, value) {
     for (var i = 0; i < 9; i++) {
