@@ -23,6 +23,7 @@ window.onload = function () {
     message = document.getElementById("display-message");
     resetGame();
     displayInfo();
+    preloadImages();
 };
 function displayInfo() {
     var infoDisplay = document.getElementById("display-info");
@@ -38,6 +39,13 @@ function displayInfo() {
             infoDisplay.style.display = "none";
         }
     };
+}
+function preloadImages() {
+    for (var i = 1; i <= 6; i++) {
+        var image = new Image();
+        image.src = "pics/" + i + ".png";
+    }
+    ;
 }
 function resetGame() {
     in_game = false;

@@ -8,6 +8,8 @@ var displayCurrBombs;
 var flagMode = false;
 var in_game = false;
 var message;
+var GAME_WON = "You win! :D";
+var GAME_LOST = "You lost! :(";
 window.onload = function () {
     var buttonSmall = document.getElementById("button-small");
     var buttonMedium = document.getElementById("button-medium");
@@ -24,12 +26,15 @@ window.onload = function () {
     }
     document.addEventListener("keypress", function (press) {
         var value = press.key;
-        if (value == "f")
+        if (value === "f")
             toggleFlagMode();
+        else if (["1", "2", "3"].includes(value))
+            startGame(parseInt(value));
     });
     displayCurrBombs = document.getElementById("display-curr-bombs");
     message = document.getElementById("display-message");
     displayInfo();
+    preloadImages();
 };
 function displayInfo() {
     var infoDisplay = document.getElementById("display-info");
@@ -46,6 +51,17 @@ function displayInfo() {
         }
     };
 }
+function preloadImages() {
+    var images = [
+        "pics/bomb.png",
+        "pics/flag.png",
+        "pics/white_flag.png"
+    ];
+    images.forEach(function (path) {
+        var image = new Image();
+        image.src = path;
+    });
+}
 function startGame(difficulty) {
     var _a;
     in_game = true;
@@ -61,6 +77,7 @@ function startGame(difficulty) {
     baseCell.innerText = " ";
     baseCell.setAttribute("value", "0");
     baseCell.setAttribute("revealed", "false");
+    baseCell.setAttribute("flag", "false");
     board = [];
     var _loop_1 = function (r) {
         var row = [];
@@ -147,7 +164,11 @@ function endGame() {
             var cell = board[r][c];
             var value = cell.getAttribute("value");
             var revealed = cell.getAttribute("revealed") === "true";
+            var flag = cell.getAttribute("flag") === "true";
             if (revealed) {
+                if (flag && value !== "-1") {
+                    cell.innerHTML = "<img src=\"pics/white_flag.png\">";
+                }
             }
             else if (value === "-1") {
                 cell.innerHTML = "<img src=\"pics/bomb.png\">";
@@ -171,15 +192,18 @@ function cellPressed(row, col) {
         cellReveal(row, col);
 }
 function cellFlag(row, col) {
+    if (currBombs === 0)
+        return;
     currBombs--;
     displayCurrBombs.innerText = currBombs.toString();
     var cell = board[row][col];
     var value = cell.getAttribute("value");
     cell.setAttribute("revealed", "true");
+    cell.setAttribute("flag", "true");
     if (value === "-1") {
         bombsFlagged++;
         if (bombsFlagged === totalBombs) {
-            message.innerText = "You won! :D";
+            message.innerText = GAME_WON;
             endGame();
         }
     }
@@ -194,6 +218,7 @@ function cellUnFlag(row, col) {
     var cell = board[row][col];
     var value = cell.getAttribute("value");
     cell.setAttribute("revealed", "false");
+    cell.setAttribute("flag", "false");
     if (value === "-1") {
         bombsFlagged--;
     }
@@ -204,7 +229,7 @@ function cellReveal(row, col) {
     var cell = board[row][col];
     var value = cell.getAttribute("value");
     if (value === "-1") {
-        message.innerText = "You lost! :(";
+        message.innerText = GAME_LOST;
         endGame();
     }
     else if (value === "0") {
@@ -212,6 +237,7 @@ function cellReveal(row, col) {
     }
     else {
         cell.innerText = value;
+        cell.setAttribute("revealed", "true");
     }
 }
 function revealAroundZeros(row, col) {

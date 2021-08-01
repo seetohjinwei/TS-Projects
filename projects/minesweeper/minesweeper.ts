@@ -11,6 +11,9 @@ var flagMode: boolean = false;
 var in_game: boolean = false;
 var message: HTMLDivElement;
 
+const GAME_WON: string = "You win! :D";
+const GAME_LOST: string = "You lost! :(";
+
 window.onload = (): void => {
     const buttonSmall: HTMLButtonElement = <HTMLButtonElement> document.getElementById("button-small");
     const buttonMedium: HTMLButtonElement = <HTMLButtonElement> document.getElementById("button-medium");
@@ -32,7 +35,8 @@ window.onload = (): void => {
     
     document.addEventListener("keypress", (press) => {
         const value: string = press.key;
-        if (value == "f") toggleFlagMode();
+        if (value === "f") toggleFlagMode();
+        else if (["1", "2", "3"].includes(value)) startGame(parseInt(value));
     });
 
     displayCurrBombs = <HTMLSpanElement> document.getElementById("display-curr-bombs");
@@ -40,6 +44,7 @@ window.onload = (): void => {
     message = <HTMLDivElement> document.getElementById("display-message");
 
     displayInfo();
+    preloadImages();
 };
 
 function displayInfo(): void {
@@ -57,6 +62,18 @@ function displayInfo(): void {
     }
 }
 
+function preloadImages(): void {
+    const images: string[] = [
+        "pics/bomb.png",
+        "pics/flag.png",
+        "pics/white_flag.png"
+    ];
+    images.forEach((path: string) => {
+        const image: HTMLImageElement = new Image();
+        image.src = path;
+    });
+}
+
 function startGame(difficulty: number): void {
     in_game = true;
     bombsFlagged = 0;
@@ -72,6 +89,7 @@ function startGame(difficulty: number): void {
     baseCell.innerText = " ";
     baseCell.setAttribute("value", "0");
     baseCell.setAttribute("revealed", "false");
+    baseCell.setAttribute("flag", "false");
     board = [];
     for (let r = 0; r < sizeOfRow; r++) {
         const row: HTMLTableCellElement[] = [];
@@ -154,8 +172,11 @@ function endGame(): void {
             const cell: HTMLTableCellElement = board[r][c];
             const value: string = cell.getAttribute("value");
             const revealed: boolean = cell.getAttribute("revealed") === "true";
+            const flag: boolean = cell.getAttribute("flag") === "true";
             if (revealed) {
-                
+                if (flag && value !== "-1") {
+                    cell.innerHTML = `<img src="pics/white_flag.png">`;
+                }
             } else if (value === "-1") {
                 cell.innerHTML = `<img src="pics/bomb.png">`;
             } else {
@@ -176,15 +197,17 @@ function cellPressed(row: number, col: number): void {
 }
 
 function cellFlag(row: number, col: number): void {
+    if (currBombs === 0) return;
     currBombs--;
     displayCurrBombs.innerText = currBombs.toString();
     const cell: HTMLTableCellElement = board[row][col];
     const value: string = cell.getAttribute("value");
     cell.setAttribute("revealed", "true");
+    cell.setAttribute("flag", "true");
     if (value === "-1") {
         bombsFlagged++;
         if (bombsFlagged === totalBombs) {
-            message.innerText = "You won! :D";
+            message.innerText = GAME_WON;
             endGame();
         }
     }
@@ -199,6 +222,7 @@ function cellUnFlag(row: number, col: number): void {
     const cell: HTMLTableCellElement = board[row][col];
     const value: string = cell.getAttribute("value");
     cell.setAttribute("revealed", "false");
+    cell.setAttribute("flag", "false");
     if (value === "-1") {
         bombsFlagged--;
     }
@@ -210,12 +234,13 @@ function cellReveal(row: number, col: number): void {
     const cell: HTMLTableCellElement = board[row][col];
     const value: string = cell.getAttribute("value");
     if (value === "-1") {
-        message.innerText = "You lost! :(";
+        message.innerText = GAME_LOST;
         endGame();
     } else if (value === "0") {
         revealAroundZeros(row, col);
     } else {
         cell.innerText = value;
+        cell.setAttribute("revealed", "true");
     }
 }
 

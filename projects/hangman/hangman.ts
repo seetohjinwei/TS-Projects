@@ -27,6 +27,7 @@ window.onload = function(): void {
 
     resetGame();
     displayInfo();
+    preloadImages();
 }
 
 function displayInfo(): void {
@@ -41,6 +42,14 @@ function displayInfo(): void {
             toggleInfo.innerText = "Show";
             infoDisplay.style.display = "none";
         }
+    };
+}
+
+function preloadImages(): void {
+    
+    for (let i = 1; i <= 6; i++) {
+        const image: HTMLImageElement = new Image();
+        image.src = `pics/${i}.png`;
     };
 }
 
