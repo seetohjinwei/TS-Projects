@@ -20,6 +20,59 @@ var buttonEasy = document.getElementById("button-easy");
 var buttonMedium = document.getElementById("button-medium");
 var buttonHard = document.getElementById("button-hard");
 var buttonValidate = document.getElementById("button-validate");
+buttonEasy.onclick = function () { return generateBoard(0); };
+buttonMedium.onclick = function () { return generateBoard(1); };
+buttonHard.onclick = function () { return generateBoard(2); };
+function generateBoard(difficulty) {
+    board = [
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0]
+    ];
+    var table = [45, 35, 25];
+    var revealedCount = table[difficulty] + Math.floor(Math.random() * 5) - 2;
+    console.log(revealedCount);
+    while (revealedCount > 0) {
+        var row = Math.floor(Math.random() * 9);
+        var col = Math.floor(Math.random() * 9);
+        if (board[row][col] !== 0)
+            continue;
+        board[row][col] = generateNumber(row, col);
+        revealedCount--;
+    }
+    function generateNumber(row, col) {
+        var possibleValues = [
+            false, false, false,
+            false, false, false,
+            false, false, false
+        ];
+        var count = 0;
+        for (var i = 0; i < 9; i++) {
+            var possible = (validPos(row, col, i + 1));
+            possibleValues[i] = possible;
+            if (possible)
+                count++;
+        }
+        console.log(count, possibleValues.toString());
+        if (count === 0)
+            return 0;
+        var index = Math.floor(Math.random() * count) + 1;
+        for (var i = 0; i < 9; i++) {
+            var possible = possibleValues[i];
+            if (possible)
+                count--;
+            if (count === 0)
+                return i + 1;
+        }
+    }
+    updateBoard();
+}
 buttonValidate.onclick = function () {
     function solvedBoard() {
         for (var i = 0; i < 9; i++) {
@@ -37,6 +90,21 @@ buttonValidate.onclick = function () {
                 return false;
             if (col.size !== 9)
                 return false;
+        }
+        for (var i = 0; i < 9; i += 3) {
+            for (var j = 0; j < 9; j += 3) {
+                var box = new Set();
+                for (var k = i; k < i + 3; k++) {
+                    for (var l = j; l < j + 3; l++) {
+                        var b = board[k][l];
+                        if (b === 0)
+                            return false;
+                        box.add(b);
+                    }
+                }
+                if (box.size !== 9)
+                    return false;
+            }
         }
         return true;
     }

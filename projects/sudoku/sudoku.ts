@@ -24,9 +24,61 @@ const buttonMedium: HTMLElement = document.getElementById("button-medium");
 const buttonHard: HTMLElement = document.getElementById("button-hard");
 const buttonValidate: HTMLElement = document.getElementById("button-validate");
 
+buttonEasy.onclick = () => generateBoard(0);
+buttonMedium.onclick = () => generateBoard(1);
+buttonHard.onclick = () => generateBoard(2);
+
+function generateBoard(difficulty: number): void {
+    board = [
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0]
+    ];
+
+    const table: number[] = [45, 35, 25];
+    let revealedCount: number = table[difficulty] + Math.floor(Math.random() * 5) - 2; // += 2
+    console.log(revealedCount);
+
+    while (revealedCount > 0) {
+        const row: number = Math.floor(Math.random() * 9);
+        const col: number = Math.floor(Math.random() * 9);
+        if (board[row][col] !== 0) continue;
+        board[row][col] = generateNumber(row, col);
+        revealedCount--;
+    }
+
+    function generateNumber(row: number, col: number): number {
+        const possibleValues: boolean[] = [
+            false, false, false,
+            false, false, false,
+            false, false, false
+        ]
+        let count: number = 0;
+        for (let i = 0; i < 9; i++) {
+            const possible: boolean = (validPos(row, col, i+1));
+            possibleValues[i] = possible;
+            if (possible) count++;
+        }
+        console.log(count, possibleValues.toString());
+        if (count === 0) return 0;
+        const index: number = Math.floor(Math.random() * count) + 1;
+        for (let i = 0; i < 9; i++) {
+            const possible: boolean = possibleValues[i];
+            if (possible) count--;
+            if (count === 0) return i + 1;
+        }
+    }
+    updateBoard();
+}
+
 buttonValidate.onclick = () => {
     function solvedBoard(): boolean {
-        // haven't check for box
         for (let i = 0; i < 9; i++) {
             const row: Set<number> = new Set();
             const col: Set<number> = new Set();
@@ -39,6 +91,19 @@ buttonValidate.onclick = () => {
             }
             if (row.size !== 9) return false;
             if (col.size !== 9) return false;
+        }
+        for (let i = 0; i < 9; i += 3) {
+            for (let j = 0; j < 9; j += 3) {
+                const box: Set<number> = new Set();
+                for (let k = i; k < i + 3; k++) {
+                    for (let l = j; l < j + 3; l++) {
+                        const b: number = board[k][l];
+                        if (b === 0) return false;
+                        box.add(b);
+                    }
+                }
+                if (box.size !== 9) return false;
+            }
         }
         return true;
     }
@@ -172,7 +237,7 @@ function displayInfo(): void {
     const infoDisplay: HTMLUListElement = <HTMLUListElement> document.getElementById("display-info");
     const toggleInfo: HTMLSpanElement = <HTMLSpanElement> document.getElementById("display-toggle-text");
     infoDisplay.style.display = "none";
-    document.getElementById("button-toggle-info").onclick = function(): void {
+    document.getElementById("button-toggle-info").onclick = () => {
         if (toggleInfo.innerHTML === "Show") {
             toggleInfo.innerText = "Hide";
             infoDisplay.style.display = "block";
@@ -180,7 +245,7 @@ function displayInfo(): void {
             toggleInfo.innerText = "Show";
             infoDisplay.style.display = "none";
         }
-    }
+    };
 }
 
 buttonReset.onclick = () => {
@@ -256,11 +321,11 @@ function validPos(r: number, c: number, value: number): boolean {
     return true;
 }
 
-buttonSolve.onclick = function(): void {
+buttonSolve.onclick = () => {
     if (!validBoard()) return;
     solve();
     message.innerText = "Solved!";
-}
+};
 
 /* used for debugging
 UNSOLVED:
