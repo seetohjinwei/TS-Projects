@@ -12,6 +12,7 @@
     <body>
         <h1><a href="../projects.html">Code Generator</a></h1>
         <h3>by Jin Wei</h3>
+        <div id="display-message"><br></div>
         <select name="Snippets" id="select">
             <option disabled selected value="-- select an option--"></option>
         </select>
@@ -22,7 +23,27 @@
             <button id="button-generate" hidden>Generate!</button>
         </div>
         <br>
-        <textarea type="text" name="Output" id="display" rows="1" cols="50"></textarea>
+        <textarea type="text" name="Output" id="display" rows="5" cols="50"></textarea>
+        <button id="button-add">Add Snippet</button>
+        <div>
+            <button id="button-toggle-info"><span id="display-toggle-text">Show</span> Info</button>
+            <div id="display-info">
+                <ul>
+                    <li>Choose from the dropdown and press go</li>
+                    <li>Fill in the boxes</li>
+                    <li>Press generate!</li>
+                    <li>To add snippet, fill in the box with correct formatting</li>
+                    <li>Then hit add snippet</li>
+                    <li>.{true} indicates optional parameter</li>
+                    <li>.{false} indicates compulsory (not optional) parameter</li>
+                </ul>
+                <img src="snippet.png" width="400px">
+                <br><br>
+                will generate
+                <br><br>
+                <img src="generated.png" width="400px">
+            </div>
+        </div>
     </body>
     <script src="code.js"></script>
 </html>
