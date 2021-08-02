@@ -4,10 +4,11 @@ var sizeOfCol = 0;
 var totalBombs = 0;
 var currBombs = 0;
 var bombsFlagged = 0;
-var displayCurrBombs;
+var displayCurrBombs = document.getElementById("display-curr-bombs");
+;
 var flagMode = false;
 var in_game = false;
-var message;
+var message = document.getElementById("display-message");
 var GAME_WON = "You win! :D";
 var GAME_LOST = "You lost! :(";
 window.onload = function () {
@@ -19,22 +20,27 @@ window.onload = function () {
     buttonLarge.onclick = function () { return startGame(3); };
     var displayFlagMode = document.getElementById("display-flag-mode");
     var buttonFlag = document.getElementById("button-flag");
-    buttonFlag.onclick = function () { return toggleFlagMode(); };
-    function toggleFlagMode() {
+    buttonFlag.onclick = function () {
         flagMode = !flagMode;
         displayFlagMode.innerText = (flagMode) ? "On" : "Off";
-    }
+    };
     document.addEventListener("keypress", function (press) {
         var value = press.key;
         if (value === "f")
-            toggleFlagMode();
+            buttonFlag.click();
         else if (["1", "2", "3"].includes(value))
             startGame(parseInt(value));
     });
-    displayCurrBombs = document.getElementById("display-curr-bombs");
-    message = document.getElementById("display-message");
     displayInfo();
-    preloadImages();
+    var images = [
+        "pics/bomb.png",
+        "pics/flag.png",
+        "pics/white_flag.png"
+    ];
+    images.forEach(function (path) {
+        var image = new Image();
+        image.src = path;
+    });
 };
 function displayInfo() {
     var infoDisplay = document.getElementById("display-info");
@@ -50,17 +56,6 @@ function displayInfo() {
             infoDisplay.style.display = "none";
         }
     };
-}
-function preloadImages() {
-    var images = [
-        "pics/bomb.png",
-        "pics/flag.png",
-        "pics/white_flag.png"
-    ];
-    images.forEach(function (path) {
-        var image = new Image();
-        image.src = path;
-    });
 }
 function startGame(difficulty) {
     var _a;

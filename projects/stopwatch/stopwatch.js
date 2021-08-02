@@ -1,134 +1,105 @@
-window.onload = function() {
-    console.log("Window loaded, javascript working!");
-
-    document.addEventListener("keydown", function(press) {
-        switch (press.key) {
-            case " ":
-                startFunc();
-                break;
-            case "r":
-                resetFunc();
-                break;
-            case "l":
-                lapFunc();
-                break;
-            case "o":
-                clearLapsFunc();
-                break;
-            case "f":
-                freezeFunc();
-                break;
-            default:
-                break;
-        }
-    });
-
-    let milli = 0;
-    let seconds = 0;
-    let minutes = 0;
-    let appendMilli = document.getElementById("milli");
-    let appendSeconds = document.getElementById("seconds");
-    let appendMinutes = document.getElementById("minutes");
-    let buttonStart = document.getElementById("button-start");
-    let startstopDisplay = document.getElementById("start-stop");
-    let buttonReset = document.getElementById("button-reset");
-    let Interval;
-    let running = false;
-
-    let laps = [];
-    let buttonLap = document.getElementById("lap");
-    let buttonClearLaps = document.getElementById("clear-laps");
-    let lapsList = document.getElementById("laps-list");
-
-    let freeze = "";
-    let buttonFreeze = document.getElementById("button-freeze");
-    let freezeDisplay = document.getElementById("freeze-display");
-
-    buttonStart.onclick = function() {startFunc();}
-    
-    function startFunc() {
-        clearInterval(Interval);
-        if (!running) {
-            Interval = setInterval(startTimer, 10);
-            running = true;
-            startstopDisplay.innerHTML = "Stop";
-        } else {
-            running = false;
-            startstopDisplay.innerHTML = "Start";
-        }
+document.addEventListener("keydown", function (press) {
+    var value = press.key;
+    if (value === " ")
+        buttonStart.click();
+    else if (value === "r")
+        buttonReset.click();
+    else if (value === "l")
+        buttonLap.click();
+    else if (value === "o")
+        buttonClearLaps.click();
+    else if (value === "f")
+        buttonFreeze.click();
+});
+var buttonStart = document.getElementById("button-start");
+var buttonReset = document.getElementById("button-reset");
+var buttonLap = document.getElementById("lap");
+var buttonClearLaps = document.getElementById("clear-laps");
+var buttonFreeze = document.getElementById("button-freeze");
+buttonStart.onclick = function () {
+    clearInterval(Interval);
+    if (!running) {
+        Interval = setInterval(startTimer, 10);
+        running = true;
+        displayStartStop("Stop");
     }
-
-    buttonReset.onclick = function() {resetFunc();}
-    
-    function resetFunc() {
+    else {
         running = false;
-        startstopDisplay.innerHTML = "Start";
-        clearInterval(Interval);
+        displayStartStop("Start");
+    }
+};
+buttonReset.onclick = function () {
+    running = false;
+    displayStartStop("Start");
+    clearInterval(Interval);
+    milli = -1;
+    seconds = 0;
+    minutes = 0;
+    startTimer();
+};
+buttonLap.onclick = function () { return funcLaps(false); };
+buttonClearLaps.onclick = function () { return funcLaps(true); };
+function funcLaps(clear) {
+    var lapsList = document.getElementById("laps-list");
+    if (clear) {
+        while (lapsList.hasChildNodes()) {
+            lapsList.removeChild(lapsList.firstChild);
+        }
+        return;
+    }
+    var entry = displayTime();
+    var item = document.createElement("li");
+    item.textContent = entry;
+    lapsList.appendChild(item);
+}
+buttonFreeze.onclick = function () {
+    var freezeDisplay = document.getElementById("freeze-display");
+    freezeDisplay.innerText = ": " + displayTime();
+};
+var milli = 0;
+var seconds = 0;
+var minutes = 0;
+var Interval;
+var running = false;
+function displayTime() {
+    var minuteString = minutes.toString().padStart(2, '0');
+    var secondsString = seconds.toString().padStart(2, '0');
+    var milliString = milli.toString().padStart(2, '0');
+    return "" + (minutes != 0 ? minuteString + ":" : "") + secondsString + ":" + milliString;
+}
+function startTimer() {
+    var appendMilli = document.getElementById("milli");
+    var appendSeconds = document.getElementById("seconds");
+    var appendMinutes = document.getElementById("minutes");
+    milli++;
+    if (milli < 10)
+        appendMilli.innerText = "0" + milli;
+    else if (milli < 100)
+        appendMilli.innerText = milli.toString();
+    else {
+        seconds++;
         milli = 0;
+        appendMilli.innerText = "00";
+    }
+    if (seconds == 0)
+        appendSeconds.innerText = "00";
+    else if (seconds < 10)
+        appendSeconds.innerText = "0" + seconds;
+    else if (seconds < 60)
+        appendSeconds.innerText = seconds.toString();
+    else {
         seconds = 0;
-        minutes = 0;
-        appendMilli.innerHTML = "00";
-        appendSeconds.innerHTML = "00";
-        appendMinutes.innerHTML = "";
+        minutes++;
+        appendSeconds.innerText = "00";
     }
-
-    function displayTime() {
-        let minuteString = minutes.toString().padStart(2, '0');
-        let secondsString = seconds.toString().padStart(2, '0');
-        let milliString = milli.toString().padStart(2, '0');
-        return `${minutes != 0 ? minuteString + ":" : ""}${secondsString}:${milliString}`;
-    }
-
-    buttonLap.onclick = function() {lapFunc();}
-
-    function lapFunc() {
-        laps.push(displayTime());
-        lapOL();
-    }
-
-    buttonClearLaps.onclick = function() {clearLapsFunc();}
-    
-    function clearLapsFunc() {
-        laps.length = 0;
-        lapOL();
-    }
-
-    function lapOL() {
-        let list = document.createElement("ol");
-        for (let i = 0; i < laps.length; i++) {
-            let item = document.createElement("li");
-            item.appendChild(document.createTextNode(laps[i]));
-            list.appendChild(item);
-        }
-        lapsList.innerHTML = "";
-        lapsList.appendChild(list);
-    }
-
-    buttonFreeze.onclick = function() {freezeFunc();}
-
-    function freezeFunc() {
-        freezeDisplay.innerHTML = ": " + displayTime();
-    }
-
-    function startTimer() {
-        milli++;
-        if (milli < 10) appendMilli.innerHTML = "0" + milli;
-        else if (milli < 100) appendMilli.innerHTML = milli;
-        else {
-            seconds++;
-            milli = 0;
-            appendMilli.innerHTML = "00";
-        }
-        if (seconds == 0) appendSeconds.innerHTML = "00";
-        else if (seconds < 10) appendSeconds.innerHTML = "0" + seconds;
-        else if (seconds < 60) appendSeconds.innerHTML = seconds;
-        else {
-            seconds = 0;
-            minutes++;
-            appendSeconds.innerHTML = "00";
-        }
-        if (minutes == 0) appendMinutes.innerHTML = "";
-        else if (minutes < 10) appendMinutes.innerHTML = "0" + minutes + ":";
-        else appendMinutes.innerHTML = minutes + ":";
-    }
+    if (minutes == 0)
+        appendMinutes.innerText = "";
+    else if (minutes < 10)
+        appendMinutes.innerText = "0" + minutes + ":";
+    else
+        appendMinutes.innerText = minutes + ":";
+}
+function displayStartStop(message) {
+    var display = document.getElementById("start-stop");
+    display.innerText = message;
 }

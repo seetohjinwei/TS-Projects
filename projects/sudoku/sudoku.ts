@@ -1,3 +1,14 @@
+window.onload = () => {
+    updateBoard();
+    displaySelectors(true);
+    displayInfo();
+
+    document.addEventListener("keypress", (press: KeyboardEvent) => {
+        const value: string = press.key.toUpperCase();
+        handleKeyPress(value);
+    });
+};
+
 var board: number[][] = [
     [0,0,0,0,0,0,0,0,0],
     [0,0,0,0,0,0,0,0,0],
@@ -110,17 +121,6 @@ buttonValidate.onclick = () => {
     const valid: boolean = solvedBoard();
     
     message.innerText = valid ? "You did it! :D" : "Hmm, seems like there's an error";
-};
-
-window.onload = () => {
-    updateBoard();
-    displaySelectors(true);
-    displayInfo();
-
-    document.addEventListener("keypress", (press: KeyboardEvent) => {
-        const value: string = press.key.toUpperCase();
-        handleKeyPress(value);
-    });
 };
 
 function handleKeyPress(value: string): void {

@@ -6,15 +6,15 @@ var sizeOfCol: number = 0;
 var totalBombs: number = 0;
 var currBombs: number = 0; // displayed value that simply shows number of flags (real or not)
 var bombsFlagged: number = 0; // hidden value that tracks actual bombs that are flagged
-var displayCurrBombs: HTMLSpanElement;
+const displayCurrBombs: HTMLSpanElement = <HTMLSpanElement> document.getElementById("display-curr-bombs");;
 var flagMode: boolean = false;
 var in_game: boolean = false;
-var message: HTMLDivElement;
+const message: HTMLDivElement = <HTMLDivElement> document.getElementById("display-message");
 
 const GAME_WON: string = "You win! :D";
 const GAME_LOST: string = "You lost! :(";
 
-window.onload = (): void => {
+window.onload = () => {
     const buttonSmall: HTMLButtonElement = <HTMLButtonElement> document.getElementById("button-small");
     const buttonMedium: HTMLButtonElement = <HTMLButtonElement> document.getElementById("button-medium");
     const buttonLarge: HTMLButtonElement = <HTMLButtonElement> document.getElementById("button-large");
@@ -26,25 +26,29 @@ window.onload = (): void => {
     const displayFlagMode: HTMLSpanElement = <HTMLSpanElement> document.getElementById("display-flag-mode");
     const buttonFlag: HTMLButtonElement = <HTMLButtonElement> document.getElementById("button-flag");
 
-    buttonFlag.onclick = () => toggleFlagMode();
-    
-    function toggleFlagMode(): void {
+    buttonFlag.onclick = () => {
         flagMode = !flagMode;
         displayFlagMode.innerText = (flagMode) ? "On" : "Off";
-    }
+    };
     
     document.addEventListener("keypress", (press) => {
         const value: string = press.key;
-        if (value === "f") toggleFlagMode();
+        if (value === "f") buttonFlag.click();
         else if (["1", "2", "3"].includes(value)) startGame(parseInt(value));
     });
 
-    displayCurrBombs = <HTMLSpanElement> document.getElementById("display-curr-bombs");
-
-    message = <HTMLDivElement> document.getElementById("display-message");
-
     displayInfo();
-    preloadImages();
+    
+    //preload images
+    const images: string[] = [
+        "pics/bomb.png",
+        "pics/flag.png",
+        "pics/white_flag.png"
+    ];
+    images.forEach((path: string) => {
+        const image: HTMLImageElement = new Image();
+        image.src = path;
+    });
 };
 
 function displayInfo(): void {
@@ -60,18 +64,6 @@ function displayInfo(): void {
             infoDisplay.style.display = "none";
         }
     }
-}
-
-function preloadImages(): void {
-    const images: string[] = [
-        "pics/bomb.png",
-        "pics/flag.png",
-        "pics/white_flag.png"
-    ];
-    images.forEach((path: string) => {
-        const image: HTMLImageElement = new Image();
-        image.src = path;
-    });
 }
 
 function startGame(difficulty: number): void {

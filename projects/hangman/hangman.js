@@ -1,30 +1,59 @@
 var health = 1;
-var picture;
-var guessArea;
 var word = "";
 var in_game = false;
 var table = [];
-var message;
+var picture = document.getElementById("display-health");
+var guessArea = document.getElementById("guess-area");
+var message = document.getElementById("display-message");
 window.onload = function () {
-    picture = document.getElementById("display-health");
-    guessArea = document.getElementById("guess-area");
-    var buttonStart = document.getElementById("button-start");
-    var buttonReset = document.getElementById("button-reset");
-    buttonStart.onclick = function () { return startGame(); };
-    buttonReset.onclick = function () { return resetGame(); };
     document.addEventListener("keypress", function (press) {
         var value = press.key.toUpperCase();
         var ascii = value.charCodeAt(0);
         if (value === "ENTER")
-            startGame();
+            buttonStart.click();
         else if (ascii >= 65 && ascii <= 90)
             alphabetPressed(ascii - 65);
     });
-    message = document.getElementById("display-message");
     resetGame();
     displayInfo();
-    preloadImages();
+    for (var i = 1; i <= 6; i++) {
+        var image = new Image();
+        image.src = "pics/" + i + ".png";
+    }
 };
+var buttonStart = document.getElementById("button-start");
+var buttonReset = document.getElementById("button-reset");
+buttonStart.onclick = function () {
+    var wordInput = document.getElementById("word");
+    if (wordInput.value.length < 5) {
+        message.innerText = "Word must have >= 5 characters";
+        return;
+    }
+    wordInput.blur();
+    message.innerText = "Good luck!";
+    word = wordInput.value.toUpperCase();
+    var length = 0;
+    for (var i = 0; i < word.length; i++) {
+        var value = word.charCodeAt(i);
+        if (value === 32)
+            continue;
+        if (value < 65 || value > 90) {
+            resetGame();
+            return;
+        }
+        length++;
+        table[value - 65].setAttribute("toBeFound", "true");
+    }
+    if (length < 5) {
+        resetGame();
+        return;
+    }
+    in_game = true;
+    wordInput.value = "";
+    health = 1;
+    generateGuessArea();
+};
+buttonReset.onclick = resetGame;
 function displayInfo() {
     var infoDisplay = document.getElementById("display-info");
     var toggleInfo = document.getElementById("display-toggle-text");
@@ -39,13 +68,6 @@ function displayInfo() {
             infoDisplay.style.display = "none";
         }
     };
-}
-function preloadImages() {
-    for (var i = 1; i <= 6; i++) {
-        var image = new Image();
-        image.src = "pics/" + i + ".png";
-    }
-    ;
 }
 function resetGame() {
     in_game = false;
@@ -125,34 +147,4 @@ function reduceHealth() {
         return;
     health++;
     picture.src = "pics/" + health + ".png";
-}
-function startGame() {
-    var wordInput = document.getElementById("word");
-    if (wordInput.value.length < 5) {
-        message.innerText = "Word must have >= 5 characters";
-        return;
-    }
-    wordInput.blur();
-    message.innerText = "Good luck!";
-    word = wordInput.value.toUpperCase();
-    var length = 0;
-    for (var i = 0; i < word.length; i++) {
-        var value = word.charCodeAt(i);
-        if (value === 32)
-            continue;
-        if (value < 65 || value > 90) {
-            resetGame();
-            return;
-        }
-        length++;
-        table[value - 65].setAttribute("toBeFound", "true");
-    }
-    if (length < 5) {
-        resetGame();
-        return;
-    }
-    in_game = true;
-    wordInput.value = "";
-    health = 1;
-    generateGuessArea();
 }

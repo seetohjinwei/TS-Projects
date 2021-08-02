@@ -1,3 +1,12 @@
+window.onload = function () {
+    updateBoard();
+    displaySelectors(true);
+    displayInfo();
+    document.addEventListener("keypress", function (press) {
+        var value = press.key.toUpperCase();
+        handleKeyPress(value);
+    });
+};
 var board = [
     [0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -110,15 +119,6 @@ buttonValidate.onclick = function () {
     }
     var valid = solvedBoard();
     message.innerText = valid ? "You did it! :D" : "Hmm, seems like there's an error";
-};
-window.onload = function () {
-    updateBoard();
-    displaySelectors(true);
-    displayInfo();
-    document.addEventListener("keypress", function (press) {
-        var value = press.key.toUpperCase();
-        handleKeyPress(value);
-    });
 };
 function handleKeyPress(value) {
     if (!['E', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'].includes(value))

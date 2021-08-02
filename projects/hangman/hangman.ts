@@ -1,34 +1,63 @@
 var health: number = 1;  // from 1 - 5 (6 is dead)
-var picture: HTMLImageElement;
-var guessArea: HTMLSpanElement;
 var word: string = "";
 var in_game: boolean = false;
 var table: HTMLSpanElement[] = [];  // length of 26, 1 for each char
-var message: HTMLDivElement;
 
-window.onload = function(): void {
-    picture = <HTMLImageElement> document.getElementById("display-health");
-    guessArea = <HTMLSpanElement> document.getElementById("guess-area");
-    
-    const buttonStart: HTMLButtonElement = <HTMLButtonElement> document.getElementById("button-start");
-    const buttonReset: HTMLButtonElement = <HTMLButtonElement> document.getElementById("button-reset");
+const picture: HTMLImageElement = <HTMLImageElement> document.getElementById("display-health");
+const guessArea: HTMLSpanElement = <HTMLSpanElement> document.getElementById("guess-area");
+const message: HTMLDivElement = <HTMLDivElement> document.getElementById("display-message");
 
-    buttonStart.onclick = () => startGame();
-    buttonReset.onclick = () => resetGame();
-
+window.onload = () => {
     document.addEventListener("keypress", (press) => {
         const value: string = press.key.toUpperCase();
         const ascii: number = value.charCodeAt(0);
-        if (value === "ENTER") startGame();
+        if (value === "ENTER") buttonStart.click();
         else if (ascii >= 65 && ascii <= 90) alphabetPressed(ascii - 65);
     });
 
-    message = <HTMLDivElement> document.getElementById("display-message");
-
     resetGame();
     displayInfo();
-    preloadImages();
-}
+
+    // preload images
+    for (let i = 1; i <= 6; i++) {
+        const image: HTMLImageElement = new Image();
+        image.src = `pics/${i}.png`;
+    }
+};
+
+const buttonStart: HTMLButtonElement = <HTMLButtonElement> document.getElementById("button-start");
+const buttonReset: HTMLButtonElement = <HTMLButtonElement> document.getElementById("button-reset");
+
+buttonStart.onclick = () => {
+    const wordInput: HTMLInputElement = <HTMLInputElement> document.getElementById("word");
+    if (wordInput.value.length < 5) {
+        message.innerText = "Word must have >= 5 characters";
+        return;
+    }
+    wordInput.blur();
+    message.innerText = "Good luck!";
+    word = wordInput.value.toUpperCase();
+    let length: number = 0;
+    for (let i = 0; i < word.length; i++) {
+        const value: number = word.charCodeAt(i);
+        if (value === 32) continue;
+        if (value < 65 || value > 90) {
+            resetGame();
+            return;
+        }
+        length++;
+        table[value - 65].setAttribute("toBeFound", "true");
+    }
+    if (length < 5) {
+        resetGame();
+        return;
+    }
+    in_game = true;
+    wordInput.value = "";
+    health = 1;
+    generateGuessArea();
+};
+buttonReset.onclick = resetGame;
 
 function displayInfo(): void {
     const infoDisplay: HTMLUListElement = <HTMLUListElement> document.getElementById("display-info");
@@ -42,14 +71,6 @@ function displayInfo(): void {
             toggleInfo.innerText = "Show";
             infoDisplay.style.display = "none";
         }
-    };
-}
-
-function preloadImages(): void {
-    
-    for (let i = 1; i <= 6; i++) {
-        const image: HTMLImageElement = new Image();
-        image.src = `pics/${i}.png`;
     };
 }
 
@@ -130,34 +151,4 @@ function reduceHealth(): void {
     if (health >= 6) return;
     health++;
     picture.src = `pics/${health}.png`;
-}
-
-function startGame(): void {
-    const wordInput: HTMLInputElement = <HTMLInputElement> document.getElementById("word");
-    if (wordInput.value.length < 5) {
-        message.innerText = "Word must have >= 5 characters";
-        return;
-    }
-    wordInput.blur();
-    message.innerText = "Good luck!";
-    word = wordInput.value.toUpperCase();
-    let length: number = 0;
-    for (let i = 0; i < word.length; i++) {
-        const value: number = word.charCodeAt(i);
-        if (value === 32) continue;
-        if (value < 65 || value > 90) {
-            resetGame();
-            return;
-        }
-        length++;
-        table[value - 65].setAttribute("toBeFound", "true");
-    }
-    if (length < 5) {
-        resetGame();
-        return;
-    }
-    in_game = true;
-    wordInput.value = "";
-    health = 1;
-    generateGuessArea();
 }

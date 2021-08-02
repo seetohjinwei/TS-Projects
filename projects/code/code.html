@@ -1,0 +1,28 @@
+<html>
+    <head>
+        <title>Code Generator</title>
+        <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+        <meta content="utf-8" http-equiv="encoding">
+        <style>
+            .body {
+                font-family: 'Times New Roman', Times, serif;
+            }
+        </style>
+    </head>
+    <body>
+        <h1><a href="../projects.html">Code Generator</a></h1>
+        <h3>by Jin Wei</h3>
+        <select name="Snippets" id="select">
+            <option disabled selected value="-- select an option--"></option>
+        </select>
+        <button id="button-select">Go</button>
+        <br><br>
+        <div>
+            <span id="parameters"></span>
+            <button id="button-generate" hidden>Generate!</button>
+        </div>
+        <br>
+        <textarea type="text" name="Output" id="display" rows="1" cols="50"></textarea>
+    </body>
+    <script src="code.js"></script>
+</html>

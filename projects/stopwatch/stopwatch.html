@@ -1,5 +1,4 @@
 <html>
-    <script src="stopwatch.js"></script>
     <head>
         <title>Stopwatch</title>
         <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
@@ -10,12 +9,13 @@
         <h2>Javascript Demonstration!</h2>
         <h3>by Jin Wei</h3>
         <p>Time Elapsed: <span id="minutes"></span><span id="seconds">00</span>:<span id="milli">00</span></p>
-        <button id="button-start"><span id="start-stop">Start</span> (space)</button>
-        <button id="button-reset">Reset (r)</button>
-        <button id="button-freeze">Freeze (f)<span id="freeze-display"></span></button>
+        <button id="button-start" onfocus="this.blur()"><span id="start-stop">Start</span> (space)</button>
+        <button id="button-reset" onfocus="this.blur()">Reset (r)</button>
+        <button id="button-freeze" onfocus="this.blur()">Freeze (f)<span id="freeze-display"></span></button>
         <br>
-        <button id="lap">Lap (l)</button>
-        <button id="clear-laps">Clear Laps (o)</button>
-        <span id="laps-list"></span>
+        <button id="lap" onfocus="this.blur()">Lap (l)</button>
+        <button id="clear-laps" onfocus="this.blur()">Clear Laps (o)</button>
+        <ol id="laps-list"></ol>
     </body>
+    <script src="stopwatch.js"></script>
 </html>

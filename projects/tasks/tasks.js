@@ -1,67 +1,59 @@
-var tasks = [];
-var buttonAddTask;
-var buttonRemoveTask;
-var taskDisplay;
-var userInput;
-var browserImport;
+window.onload = function () {
+    buttons();
+    taskDisplayFunc();
+    displayInfo();
+    document.addEventListener('keypress', function (press) {
+        if (press.key !== "Enter")
+            return;
+        if (userInput.value !== "")
+            addFunc();
+        if (userRemove.value !== "")
+            removeFunc();
+    });
+};
+window.onbeforeunload = saveFunc;
+function buttons() {
+    var buttonAddTask = document.getElementById("button-tasks-add");
+    var buttonRemoveTask = document.getElementById("button-tasks-remove");
+    var buttonClearTasks = document.getElementById("button-tasks-clear");
+    var buttonSaveTasks = document.getElementById("button-tasks-save");
+    var buttonRecoverTasks = document.getElementById("button-tasks-recover");
+    var buttonImportTasks = document.getElementById("button-tasks-import");
+    var buttonExportTasks = document.getElementById("button-tasks-export");
+    buttonAddTask.onclick = addFunc;
+    buttonRemoveTask.onclick = removeFunc;
+    buttonClearTasks.onclick = function () {
+        if (confirm("Clear all?")) {
+            tasks = [];
+            taskDisplayFunc();
+        }
+    };
+    buttonSaveTasks.onclick = saveFunc;
+    buttonRecoverTasks.onclick = function () {
+        tasks = localStorage.getTasks();
+        taskDisplayFunc();
+    };
+    var browserImport = document.getElementById("browser-import");
+    buttonImportTasks.onclick = function () {
+        decodeTasks(browserImport.value);
+        browserImport.value = "";
+    };
+    buttonExportTasks.onclick = function () {
+        browserImport.value = encodeTasks();
+        browserImport.select();
+    };
+}
+var userInput = document.getElementById("user-input");
+var userRemove = document.getElementById("user-remove");
 Storage.prototype.setTasks = function (obj) {
     return this.setItem("tasks", JSON.stringify(obj));
 };
 Storage.prototype.getTasks = function () {
     return JSON.parse(this.getItem("tasks"));
 };
-window.onload = function () {
-    userInput = document.getElementById("user-input");
-    taskDisplay = document.getElementById("display-tasks");
-    tasks = localStorage.getTasks() || [];
-    taskDisplayFunc();
-    document.getElementById("button-tasks-add").onclick = function () {
-        addFunc();
-    };
-    userInput.addEventListener('keypress', function (press) {
-        if (press.key == "Enter")
-            addFunc();
-    });
-    document.getElementById("button-tasks-remove").onclick = function () {
-        removeFunc();
-    };
-    document.getElementById("user-remove").addEventListener('keypress', function (press) {
-        if (press.key == "Enter")
-            removeFunc();
-    });
-    document.getElementById("button-tasks-clear").onclick = function () {
-        if (confirm("Clear all?")) {
-            tasks = [];
-            taskDisplayFunc();
-        }
-    };
-    document.getElementById("button-tasks-save").onclick = function () {
-        saveFunc();
-    };
-    document.getElementById("button-tasks-recover").onclick = function () {
-        recoverFunc();
-    };
-    browserImport = document.getElementById("browser-import");
-    document.getElementById("button-tasks-export").onclick = function () {
-        browserImport.value = encodeTasks();
-        browserImport.select();
-    };
-    document.getElementById("button-tasks-import").onclick = function () {
-        decodeTasks(browserImport.value);
-        browserImport.value = "";
-    };
-    displayInfo();
-};
-window.onbeforeunload = function () {
-    console.log("detected refresh or tab close");
-    saveFunc();
-};
+var tasks = localStorage.getTasks() || [];
 function saveFunc() {
     localStorage.setTasks(tasks);
-    taskDisplayFunc();
-}
-function recoverFunc() {
-    tasks = localStorage.getTasks();
     taskDisplayFunc();
 }
 function addFunc() {
@@ -74,7 +66,6 @@ function addFunc() {
     taskDisplayFunc();
 }
 function removeFunc() {
-    var userRemove = document.getElementById("user-remove");
     var input = userRemove.value;
     if (input.match(/^\d+$/)) {
         var indexToRemove = parseInt(input);
@@ -123,6 +114,7 @@ function taskDisplayFunc() {
     for (var i = 0; i < tasks.length; i++) {
         _loop_1(i);
     }
+    var taskDisplay = document.getElementById("display-tasks");
     taskDisplay.innerHTML = "";
     taskDisplay.appendChild(ol);
 }

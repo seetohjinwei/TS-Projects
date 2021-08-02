@@ -1,12 +1,55 @@
 // task = ["Task", markAsDone]
 type task = [string, boolean];
-let tasks: task[] = [];
-let buttonAddTask: HTMLElement;
-let buttonRemoveTask: HTMLElement;
-let taskDisplay: HTMLElement;
 
-let userInput: HTMLInputElement;
-let browserImport: HTMLInputElement;
+window.onload = () => {
+    buttons();
+    taskDisplayFunc();
+    displayInfo();
+
+    document.addEventListener('keypress', (press) => {
+        if (press.key !== "Enter") return;
+        if (userInput.value !== "") addFunc();
+        if (userRemove.value !== "") removeFunc();
+    });
+};
+
+window.onbeforeunload = saveFunc;
+
+function buttons(): void {
+    const buttonAddTask: HTMLButtonElement = <HTMLButtonElement> document.getElementById("button-tasks-add");
+    const buttonRemoveTask: HTMLButtonElement = <HTMLButtonElement> document.getElementById("button-tasks-remove");
+    const buttonClearTasks: HTMLButtonElement = <HTMLButtonElement> document.getElementById("button-tasks-clear");
+    const buttonSaveTasks: HTMLButtonElement = <HTMLButtonElement> document.getElementById("button-tasks-save");
+    const buttonRecoverTasks: HTMLButtonElement = <HTMLButtonElement> document.getElementById("button-tasks-recover");
+    const buttonImportTasks: HTMLButtonElement = <HTMLButtonElement> document.getElementById("button-tasks-import");
+    const buttonExportTasks: HTMLButtonElement = <HTMLButtonElement> document.getElementById("button-tasks-export");
+
+    buttonAddTask.onclick = addFunc;
+    buttonRemoveTask.onclick = removeFunc;
+    buttonClearTasks.onclick = () => {
+        if (confirm("Clear all?")) {
+            tasks = [];
+            taskDisplayFunc();
+        }
+    };
+    buttonSaveTasks.onclick = saveFunc;
+    buttonRecoverTasks.onclick = () => {
+        tasks = localStorage.getTasks();
+        taskDisplayFunc();
+    };
+    const browserImport: HTMLInputElement = <HTMLInputElement> document.getElementById("browser-import");
+    buttonImportTasks.onclick = () => {
+        decodeTasks(browserImport.value);
+        browserImport.value = "";
+    };
+    buttonExportTasks.onclick = () => {
+        browserImport.value = encodeTasks();
+        browserImport.select();
+    };
+}
+
+const userInput: HTMLInputElement = <HTMLInputElement> document.getElementById("user-input");
+const userRemove: HTMLInputElement = <HTMLInputElement> document.getElementById("user-remove");
 
 // https://stackoverflow.com/questions/3357553/how-do-i-store-an-array-in-localstorage
 Storage.prototype.setTasks = function(obj: task[]): string {
@@ -16,70 +59,10 @@ Storage.prototype.getTasks = function(): task[] {
     return JSON.parse(this.getItem("tasks"));
 }
 
-window.onload = function(): void {
-    userInput = <HTMLInputElement> document.getElementById("user-input");
-    taskDisplay = document.getElementById("display-tasks");
-    tasks = localStorage.getTasks() || [];
-    taskDisplayFunc();
+var tasks: task[] = localStorage.getTasks() || [];
 
-    document.getElementById("button-tasks-add").onclick = function(): void {
-        addFunc();
-    };
-
-    userInput.addEventListener('keypress', function(press) {
-        if (press.key == "Enter") addFunc();
-    });
-
-    document.getElementById("button-tasks-remove").onclick = function(): void {
-        removeFunc();
-    };
-
-    document.getElementById("user-remove").addEventListener('keypress', function(press) {
-        if (press.key == "Enter") removeFunc();
-    });
-
-    document.getElementById("button-tasks-clear").onclick = function(): void {
-        if (confirm("Clear all?")) {
-            tasks = [];
-            taskDisplayFunc();
-        }
-    };
-
-    document.getElementById("button-tasks-save").onclick = function (): void {
-        saveFunc();
-    };
-
-    document.getElementById("button-tasks-recover").onclick = function(): void {
-        recoverFunc();
-    };
-
-    browserImport = <HTMLInputElement> document.getElementById("browser-import");
-
-    document.getElementById("button-tasks-export").onclick = function(): void {
-        browserImport.value = encodeTasks();
-        browserImport.select();
-    };
-
-    document.getElementById("button-tasks-import").onclick = function(): void {
-        decodeTasks(browserImport.value);
-        browserImport.value = "";
-    };
-
-    displayInfo();
-}
-
-window.onbeforeunload = function(): void {
-    console.log("detected refresh or tab close")
-    saveFunc();
-}
-
-function saveFunc():void {
+function saveFunc(): void {
     localStorage.setTasks(tasks);
-    taskDisplayFunc();
-}
-
-function recoverFunc(): void {
-    tasks = localStorage.getTasks();
     taskDisplayFunc();
 }
 
@@ -93,7 +76,6 @@ function addFunc(): void {
 }
 
 function removeFunc(): void {
-    const userRemove: HTMLInputElement = <HTMLInputElement> document.getElementById("user-remove");
     const input: string = userRemove.value;
     if (input.match(/^\d+$/)) {
         const indexToRemove: number = parseInt(input);
@@ -137,6 +119,8 @@ function taskDisplayFunc(): void {
 
         ol.appendChild(li);
     }
+
+    const taskDisplay: HTMLSpanElement = <HTMLSpanElement> document.getElementById("display-tasks");
     taskDisplay.innerHTML = "";
     taskDisplay.appendChild(ol);
 }
