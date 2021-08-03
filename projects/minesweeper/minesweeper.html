@@ -28,22 +28,22 @@
     <body>
         <h1><a href="../projects.html">Minesweeper</a></h1>
         <h3>by Jin Wei</h3>
-        <button id="button-small">Small</button>
-        <button id="button-medium">Medium</button>
-        <button id="button-large">Large</button>
+        <button onclick="startGame(1)">Small</button>
+        <button onclick="startGame(2)">Medium</button>
+        <button onclick="startGame(3)">Large</button>
         <br><br>
         <div id="display-message"><br></div>
         <div>
             Bombs: <span id="display-curr-bombs">0</span>/<span id="display-total-bombs">0</span>
         </div>
-        <button id="button-flag">Flag <span id="display-flag-mode">Off</span></button>
+        <button onclick="toggleFlagMode()">Flag <span id="display-flag-mode">Off</span></button>
         <table>
             <tbody id="display-board"></tbody>
         </table>
         <br>
         <div>
             <button id="button-toggle-info"><span id="display-toggle-text">Show</span> Info</button>
-            <ul id="display-info">
+            <ul id="display-info" style="display: none;">
                 <li>Press Flag Button or "F" on keyboard to toggle FlagMode</li>
                 <li>Flag all bombs to win!</li>
                 <li>Small - 8 * 8, 10 bombs</li>

@@ -1,34 +1,18 @@
-var board = [];
-var sizeOfRow = 0;
-var sizeOfCol = 0;
-var totalBombs = 0;
-var currBombs = 0;
-var bombsFlagged = 0;
-var displayCurrBombs = document.getElementById("display-curr-bombs");
-;
-var flagMode = false;
-var in_game = false;
-var message = document.getElementById("display-message");
-var GAME_WON = "You win! :D";
-var GAME_LOST = "You lost! :(";
+function initCell(row, col) {
+    var element = document.createElement("td");
+    element.innerText = " ";
+    element.onclick = function () { return cellPressed(row, col); };
+    var value = 0;
+    var revealed = false;
+    var flag = false;
+    return { element: element, value: value, revealed: revealed, flag: flag };
+}
 window.onload = function () {
-    var buttonSmall = document.getElementById("button-small");
-    var buttonMedium = document.getElementById("button-medium");
-    var buttonLarge = document.getElementById("button-large");
-    buttonSmall.onclick = function () { return startGame(1); };
-    buttonMedium.onclick = function () { return startGame(2); };
-    buttonLarge.onclick = function () { return startGame(3); };
-    var displayFlagMode = document.getElementById("display-flag-mode");
-    var buttonFlag = document.getElementById("button-flag");
-    buttonFlag.onclick = function () {
-        flagMode = !flagMode;
-        displayFlagMode.innerText = (flagMode) ? "On" : "Off";
-    };
     document.addEventListener("keypress", function (press) {
         var value = press.key;
         if (value === "f")
-            buttonFlag.click();
-        else if (["1", "2", "3"].includes(value))
+            toggleFlagMode();
+        else if ("123".includes(value))
             startGame(parseInt(value));
     });
     displayInfo();
@@ -42,10 +26,17 @@ window.onload = function () {
         image.src = path;
     });
 };
+var board = [];
+var sizeOfRow = 0;
+var sizeOfCol = 0;
+var totalBombs = 0;
+var currBombs = 0;
+var bombsFlagged = 0;
+var flagMode = false;
+var in_game = false;
 function displayInfo() {
     var infoDisplay = document.getElementById("display-info");
     var toggleInfo = document.getElementById("display-toggle-text");
-    infoDisplay.style.display = "none";
     document.getElementById("button-toggle-info").onclick = function () {
         if (toggleInfo.innerHTML === "Show") {
             toggleInfo.innerText = "Hide";
@@ -57,37 +48,30 @@ function displayInfo() {
         }
     };
 }
+function toggleFlagMode() {
+    var displayFlagMode = document.getElementById("display-flag-mode");
+    flagMode = !flagMode;
+    displayFlagMode.innerText = (flagMode) ? "On" : "Off";
+}
 function startGame(difficulty) {
     var _a;
     in_game = true;
     bombsFlagged = 0;
-    message.innerText = "Good Luck!";
+    displayMessage("Good luck!");
     var table = {
         1: [8, 8, 10],
         2: [16, 16, 40],
         3: [16, 30, 99]
     };
     _a = table[difficulty], sizeOfRow = _a[0], sizeOfCol = _a[1], totalBombs = _a[2];
-    var baseCell = document.createElement("td");
-    baseCell.innerText = " ";
-    baseCell.setAttribute("value", "0");
-    baseCell.setAttribute("revealed", "false");
-    baseCell.setAttribute("flag", "false");
     board = [];
-    var _loop_1 = function (r) {
+    for (var r = 0; r < sizeOfRow; r++) {
         var row = [];
-        var _loop_2 = function (c) {
-            var cell = baseCell.cloneNode(true);
-            cell.onclick = function () { return cellPressed(r, c); };
-            row.push(cell);
-        };
         for (var c = 0; c < sizeOfCol; c++) {
-            _loop_2(c);
+            var cell = initCell(r, c);
+            row.push(cell);
         }
         board.push(row);
-    };
-    for (var r = 0; r < sizeOfRow; r++) {
-        _loop_1(r);
     }
     function randInt(maxValue) {
         return Math.floor(Math.random() * maxValue);
@@ -97,9 +81,8 @@ function startGame(difficulty) {
         var r = randInt(sizeOfRow);
         var c = randInt(sizeOfCol);
         var cell = board[r][c];
-        var value = cell.getAttribute("value");
-        if (value !== "-1") {
-            cell.setAttribute("value", "-1");
+        if (cell.value !== -1) {
+            cell.value = -1;
             bombsPlaced++;
         }
     }
@@ -111,9 +94,8 @@ function startGame(difficulty) {
                 if (r < 0 || r >= sizeOfRow || c < 0 || c >= sizeOfCol)
                     continue;
                 var cell = board[r][c];
-                var value = parseInt(cell.getAttribute("value"));
-                if (value !== -1) {
-                    cell.setAttribute("value", (value + 1).toString());
+                if (cell.value !== -1) {
+                    cell.value++;
                 }
             }
         }
@@ -121,8 +103,7 @@ function startGame(difficulty) {
     for (var r = 0; r < sizeOfRow; r++) {
         for (var c = 0; c < sizeOfCol; c++) {
             var cell = board[r][c];
-            var value = cell.getAttribute("value");
-            if (value === "-1") {
+            if (cell.value === -1) {
                 updateHints(r, c);
             }
         }
@@ -130,7 +111,7 @@ function startGame(difficulty) {
     var displayTotalBombs = document.getElementById("display-total-bombs");
     displayTotalBombs.innerText = totalBombs.toString();
     currBombs = totalBombs;
-    displayCurrBombs.innerText = currBombs.toString();
+    displayCurrBombs();
     displayBoard();
 }
 function displayBoard() {
@@ -141,7 +122,7 @@ function displayBoard() {
     for (var r = 0; r < sizeOfRow; r++) {
         var row = document.createElement("tr");
         for (var c = 0; c < sizeOfCol; c++) {
-            var cell = board[r][c];
+            var cell = board[r][c].element;
             row.appendChild(cell);
         }
         playArea.appendChild(row);
@@ -157,21 +138,18 @@ function endGame() {
         var row = document.createElement("tr");
         for (var c = 0; c < sizeOfCol; c++) {
             var cell = board[r][c];
-            var value = cell.getAttribute("value");
-            var revealed = cell.getAttribute("revealed") === "true";
-            var flag = cell.getAttribute("flag") === "true";
-            if (revealed) {
-                if (flag && value !== "-1") {
-                    cell.innerHTML = "<img src=\"pics/white_flag.png\">";
+            if (cell.revealed) {
+                if (cell.flag && cell.value !== -1) {
+                    cell.element.innerHTML = "<img src=\"pics/white_flag.png\">";
                 }
             }
-            else if (value === "-1") {
-                cell.innerHTML = "<img src=\"pics/bomb.png\">";
+            else if (cell.value === -1) {
+                cell.element.innerHTML = "<img src=\"pics/bomb.png\">";
             }
             else {
-                cell.innerText = value;
+                cell.element.innerText = cell.value.toString();
             }
-            row.appendChild(cell);
+            row.appendChild(cell.element);
         }
         playArea.appendChild(row);
     }
@@ -180,7 +158,7 @@ function cellPressed(row, col) {
     if (!in_game)
         return;
     var cell = board[row][col];
-    cell.onclick = function () { };
+    cell.element.onclick = null;
     if (flagMode)
         cellFlag(row, col);
     else
@@ -190,68 +168,64 @@ function cellFlag(row, col) {
     if (currBombs === 0)
         return;
     currBombs--;
-    displayCurrBombs.innerText = currBombs.toString();
+    displayCurrBombs();
     var cell = board[row][col];
-    var value = cell.getAttribute("value");
-    cell.setAttribute("revealed", "true");
-    cell.setAttribute("flag", "true");
-    if (value === "-1") {
+    cell.revealed = true;
+    cell.flag = true;
+    if (cell.value === -1) {
         bombsFlagged++;
         if (bombsFlagged === totalBombs) {
-            message.innerText = GAME_WON;
+            displayMessage(true);
             endGame();
         }
     }
-    cell.innerHTML = "<img src=\"pics/flag.png\">";
-    cell.onclick = function () { return cellUnFlag(row, col); };
+    cell.element.innerHTML = "<img src=\"pics/flag.png\">";
+    cell.element.onclick = function () { return cellUnFlag(row, col); };
 }
 function cellUnFlag(row, col) {
     if (!in_game)
         return;
     currBombs++;
-    displayCurrBombs.innerText = currBombs.toString();
+    displayCurrBombs();
     var cell = board[row][col];
-    var value = cell.getAttribute("value");
-    cell.setAttribute("revealed", "false");
-    cell.setAttribute("flag", "false");
-    if (value === "-1") {
+    cell.revealed = false;
+    cell.flag = false;
+    if (cell.value === -1) {
         bombsFlagged--;
     }
-    cell.innerHTML = "";
-    cell.onclick = function () { return cellPressed(row, col); };
+    cell.element.innerHTML = "";
+    cell.element.onclick = function () { return cellPressed(row, col); };
 }
 function cellReveal(row, col) {
     var cell = board[row][col];
-    var value = cell.getAttribute("value");
-    if (value === "-1") {
-        message.innerText = GAME_LOST;
+    if (cell.value === -1) {
+        displayMessage(false);
         endGame();
     }
-    else if (value === "0") {
+    else if (cell.value === 0) {
         revealAroundZeros(row, col);
     }
     else {
-        cell.innerText = value;
-        cell.setAttribute("revealed", "true");
+        cell.element.innerText = cell.value.toString();
+        cell.revealed = true;
     }
 }
 function revealAroundZeros(row, col) {
     var cell = board[row][col];
-    var value = cell.getAttribute("value");
-    cell.innerText = value;
-    cell.setAttribute("revealed", "true");
-    cell.onclick = function () { };
+    cell.element.innerText = cell.value.toString();
+    cell.revealed = true;
+    cell.element.onclick = null;
     function revealNext(row, col) {
         var cellNext = board[row][col];
-        var valueNext = cellNext.getAttribute("value");
-        var revealedNext = cellNext.getAttribute("revealed") === "true";
-        if (valueNext === "0" && !revealedNext) {
+        if (cellNext.revealed)
+            return;
+        if (cellNext.value === 0) {
             revealAroundZeros(row, col);
         }
         else {
-            cellNext.innerText = valueNext;
-            cellNext.setAttribute("revealed", "true");
-            cellNext.onclick = function () { };
+            cellNext.element.innerText = cellNext.value.toString();
+            cellNext.revealed = true;
+            cellNext.element.onclick = null;
         }
     }
     for (var r = row - 1; r <= row + 1; r++) {
@@ -262,4 +236,20 @@ function revealAroundZeros(row, col) {
                 revealNext(r, c);
         }
     }
+}
+function displayMessage(message) {
+    var GAME_WON = "You win! :D";
+    var GAME_LOST = "You lost! :(";
+    var display = document.getElementById("display-message");
+    if (typeof message === "boolean") {
+        display.innerText = message ? GAME_WON : GAME_LOST;
+    }
+    else {
+        display.innerText = message;
+    }
+}
+function displayCurrBombs() {
+    var message = currBombs.toString();
+    var displayCurrBombs = document.getElementById("display-curr-bombs");
+    displayCurrBombs.innerText = message;
 }
