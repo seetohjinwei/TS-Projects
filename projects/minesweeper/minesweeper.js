@@ -1,6 +1,6 @@
 function initCell(row, col) {
     var element = document.createElement("td");
-    element.innerText = " ";
+    element.innerHTML = " ";
     element.onclick = function () { return cellPressed(row, col); };
     var value = 0;
     var revealed = false;
@@ -12,6 +12,8 @@ window.onload = function () {
         var value = press.key;
         if (value === "f")
             toggleFlagMode();
+        else if (value === "c")
+            toggleCheatMode();
         else if ("123".includes(value))
             startGame(parseInt(value));
     });
@@ -34,6 +36,7 @@ var currBombs = 0;
 var bombsFlagged = 0;
 var flagMode = false;
 var in_game = false;
+var cheatMode = false;
 function displayInfo() {
     var infoDisplay = document.getElementById("display-info");
     var toggleInfo = document.getElementById("display-toggle-text");
@@ -52,6 +55,11 @@ function toggleFlagMode() {
     var displayFlagMode = document.getElementById("display-flag-mode");
     flagMode = !flagMode;
     displayFlagMode.innerText = (flagMode) ? "On" : "Off";
+}
+function toggleCheatMode() {
+    var displayCheatMode = document.getElementById("display-cheat-mode");
+    cheatMode = !cheatMode;
+    displayCheatMode.innerText = (cheatMode) ? "On" : "Off";
 }
 function startGame(difficulty) {
     var _a;
@@ -140,14 +148,14 @@ function endGame() {
             var cell = board[r][c];
             if (cell.revealed) {
                 if (cell.flag && cell.value !== -1) {
-                    cell.element.innerHTML = "<img src=\"pics/white_flag.png\">";
+                    updateCell(r, c, false, "<img src=\"pics/white_flag.png\">");
                 }
             }
             else if (cell.value === -1) {
-                cell.element.innerHTML = "<img src=\"pics/bomb.png\">";
+                updateCell(r, c, false, "<img src=\"pics/bomb.png\">");
             }
             else {
-                cell.element.innerText = cell.value.toString();
+                updateCell(r, c, false);
             }
             row.appendChild(cell.element);
         }
@@ -158,11 +166,43 @@ function cellPressed(row, col) {
     if (!in_game)
         return;
     var cell = board[row][col];
-    cell.element.onclick = null;
-    if (flagMode)
+    if (cell.flag)
+        cellUnFlag(row, col);
+    else if (cell.revealed && cheatMode)
+        cellCheat(row, col);
+    else if (flagMode)
         cellFlag(row, col);
     else
         cellReveal(row, col);
+}
+function cellCheat(row, col) {
+    for (var r = row - 1; r <= row + 1; r++) {
+        for (var c = col - 1; c <= col + 1; c++) {
+            if (r === row && c === col)
+                continue;
+            if (r >= 0 && r < sizeOfRow && c >= 0 && c < sizeOfCol) {
+                var cell = board[r][c];
+                if (cell.value === -1 && !cell.flag) {
+                    return;
+                }
+            }
+        }
+    }
+    for (var r = row - 1; r <= row + 1; r++) {
+        for (var c = col - 1; c <= col + 1; c++) {
+            if (r === row && c === col)
+                continue;
+            if (r >= 0 && r < sizeOfRow && c >= 0 && c < sizeOfCol) {
+                var cell = board[r][c];
+                if (!cell.revealed) {
+                    if (cell.value === 0)
+                        revealAroundZeros(r, c);
+                    else
+                        updateCell(r, c);
+                }
+            }
+        }
+    }
 }
 function cellFlag(row, col) {
     if (currBombs === 0)
@@ -179,8 +219,7 @@ function cellFlag(row, col) {
             endGame();
         }
     }
-    cell.element.innerHTML = "<img src=\"pics/flag.png\">";
-    cell.element.onclick = function () { return cellUnFlag(row, col); };
+    updateCell(row, col, false, "<img src=\"pics/flag.png\">");
 }
 function cellUnFlag(row, col) {
     if (!in_game)
@@ -193,8 +232,7 @@ function cellUnFlag(row, col) {
     if (cell.value === -1) {
         bombsFlagged--;
     }
-    cell.element.innerHTML = "";
-    cell.element.onclick = function () { return cellPressed(row, col); };
+    updateCell(row, col, false, "");
 }
 function cellReveal(row, col) {
     var cell = board[row][col];
@@ -206,33 +244,25 @@ function cellReveal(row, col) {
         revealAroundZeros(row, col);
     }
     else {
-        cell.element.innerText = cell.value.toString();
-        cell.revealed = true;
+        updateCell(row, col);
     }
 }
 function revealAroundZeros(row, col) {
-    var cell = board[row][col];
-    cell.element.innerText = cell.value.toString();
-    cell.revealed = true;
-    cell.element.onclick = null;
+    updateCell(row, col);
     function revealNext(row, col) {
-        var cellNext = board[row][col];
-        if (cellNext.revealed)
-            return;
-        if (cellNext.value === 0) {
+        var cell = board[row][col];
+        if (cell.value === 0) {
             revealAroundZeros(row, col);
         }
         else {
-            cellNext.element.innerText = cellNext.value.toString();
-            cellNext.revealed = true;
-            cellNext.element.onclick = null;
+            updateCell(row, col);
         }
     }
     for (var r = row - 1; r <= row + 1; r++) {
         for (var c = col - 1; c <= col + 1; c++) {
             if (r === row && c === col)
                 continue;
-            if (r >= 0 && r < sizeOfRow && c >= 0 && c < sizeOfCol)
+            if (r >= 0 && r < sizeOfRow && c >= 0 && c < sizeOfCol && !board[r][c].revealed)
                 revealNext(r, c);
         }
     }
@@ -252,4 +282,18 @@ function displayCurrBombs() {
     var message = currBombs.toString();
     var displayCurrBombs = document.getElementById("display-curr-bombs");
     displayCurrBombs.innerText = message;
+}
+function updateCell(row, col, reveal, message) {
+    if (reveal === void 0) { reveal = true; }
+    var cell = board[row][col];
+    var element = cell.element;
+    var num = cell.value;
+    var value = num.toString();
+    if (reveal)
+        cell.revealed = true;
+    if (message === undefined)
+        element.innerHTML = value;
+    else
+        element.innerHTML = message;
+    element.onclick = function () { return cellPressed(row, col); };
 }

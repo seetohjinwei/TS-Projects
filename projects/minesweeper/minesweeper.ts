@@ -7,7 +7,7 @@ interface Cell {
 
 function initCell(row: number, col: number): Cell {
     const element: HTMLTableDataCellElement = document.createElement("td");
-    element.innerText = " ";
+    element.innerHTML = " ";
     element.onclick = () => cellPressed(row, col);
     const value: number = 0;
     const revealed: boolean = false;
@@ -19,6 +19,7 @@ window.onload = () => {
     document.addEventListener("keypress", (press: KeyboardEvent) => {
         const value: string = press.key;
         if (value === "f") toggleFlagMode();
+        else if (value === "c") toggleCheatMode();
         else if ("123".includes(value)) startGame(parseInt(value));
     });
 
@@ -46,6 +47,7 @@ var currBombs: number = 0; // displayed value that simply shows number of flags 
 var bombsFlagged: number = 0; // hidden value that tracks actual bombs that are flagged
 var flagMode: boolean = false;
 var in_game: boolean = false;
+var cheatMode: boolean = false;
 
 function displayInfo(): void {
     const infoDisplay: HTMLUListElement = <HTMLUListElement> document.getElementById("display-info");
@@ -65,6 +67,12 @@ function toggleFlagMode(): void {
     const displayFlagMode: HTMLSpanElement = <HTMLSpanElement> document.getElementById("display-flag-mode");
     flagMode = !flagMode;
     displayFlagMode.innerText = (flagMode) ? "On" : "Off";
+}
+
+function toggleCheatMode(): void {
+    const displayCheatMode: HTMLSpanElement = <HTMLSpanElement> document.getElementById("display-cheat-mode");
+    cheatMode = !cheatMode;
+    displayCheatMode.innerText = (cheatMode) ? "On" : "Off";
 }
 
 function startGame(difficulty: number): void {
@@ -156,12 +164,12 @@ function endGame(): void {
             const cell: Cell = board[r][c];
             if (cell.revealed) {
                 if (cell.flag && cell.value !== -1) {
-                    cell.element.innerHTML = `<img src="pics/white_flag.png">`;
+                    updateCell(r, c, false, `<img src="pics/white_flag.png">`);
                 }
             } else if (cell.value === -1) {
-                cell.element.innerHTML = `<img src="pics/bomb.png">`;
+                updateCell(r, c, false, `<img src="pics/bomb.png">`);
             } else {
-                cell.element.innerText = cell.value.toString();
+                updateCell(r, c, false);
             }
             row.appendChild(cell.element);
         }
@@ -172,9 +180,36 @@ function endGame(): void {
 function cellPressed(row: number, col: number): void {
     if (!in_game) return;
     const cell: Cell = board[row][col];
-    cell.element.onclick = null;
-    if (flagMode) cellFlag(row, col);
+    if (cell.flag) cellUnFlag(row, col);
+    else if (cell.revealed && cheatMode) cellCheat(row, col);
+    else if (flagMode) cellFlag(row, col);
     else cellReveal(row, col);
+}
+
+function cellCheat(row: number, col: number) : void {
+    for (let r = row - 1; r <= row + 1; r++) {
+        for (let c = col - 1; c <= col + 1; c++) {
+            if (r === row && c === col) continue;
+            if (r >= 0 && r < sizeOfRow && c >= 0 && c < sizeOfCol) {
+                const cell: Cell = board[r][c];
+                if (cell.value === -1 && !cell.flag) {
+                    return;
+                }
+            }
+        }
+    }
+    for (let r = row - 1; r <= row + 1; r++) {
+        for (let c = col - 1; c <= col + 1; c++) {
+            if (r === row && c === col) continue;
+            if (r >= 0 && r < sizeOfRow && c >= 0 && c < sizeOfCol) {
+                const cell: Cell = board[r][c];
+                if (!cell.revealed) {
+                    if (cell.value === 0) revealAroundZeros(r, c);
+                    else updateCell(r, c);
+                }
+            }
+        }
+    }
 }
 
 function cellFlag(row: number, col: number): void {
@@ -191,8 +226,7 @@ function cellFlag(row: number, col: number): void {
             endGame();
         }
     }
-    cell.element.innerHTML = `<img src="pics/flag.png">`;
-    cell.element.onclick = () => cellUnFlag(row, col);
+    updateCell(row, col, false, `<img src="pics/flag.png">`);
 }
 
 function cellUnFlag(row: number, col: number): void {
@@ -205,8 +239,7 @@ function cellUnFlag(row: number, col: number): void {
     if (cell.value === -1) {
         bombsFlagged--;
     }
-    cell.element.innerHTML = "";
-    cell.element.onclick = () => cellPressed(row, col);
+    updateCell(row, col, false, "");
 }
 
 function cellReveal(row: number, col: number): void {
@@ -217,34 +250,26 @@ function cellReveal(row: number, col: number): void {
     } else if (cell.value === 0) {
         revealAroundZeros(row, col);
     } else {
-        cell.element.innerText = cell.value.toString();
-        cell.revealed = true;
+        updateCell(row, col);
     }
 }
 
 function revealAroundZeros(row: number, col: number): void {
-    const cell: Cell = board[row][col];
-    cell.element.innerText = cell.value.toString();
-    cell.revealed = true;
-    cell.element.onclick = null;
+    updateCell(row, col);
 
     function revealNext(row: number, col: number): void {
-        const cellNext: Cell = board[row][col];
-        if (cellNext.revealed) return;
-        if (cellNext.value === 0) {
+        const cell: Cell = board[row][col];
+        if (cell.value === 0) {
             revealAroundZeros(row, col);
-        }
-        else {
-            cellNext.element.innerText = cellNext.value.toString();
-            cellNext.revealed = true;
-            cellNext.element.onclick = null;
+        } else {
+            updateCell(row, col);
         }
     }
 
     for (let r = row - 1; r <= row + 1; r++) {
         for (let c = col - 1; c <= col + 1; c++) {
             if (r === row && c === col) continue;
-            if (r >= 0 && r < sizeOfRow && c >= 0 && c < sizeOfCol) revealNext(r, c);
+            if (r >= 0 && r < sizeOfRow && c >= 0 && c < sizeOfCol && !board[r][c].revealed) revealNext(r, c);
         }
     }
 }
@@ -266,4 +291,15 @@ function displayCurrBombs(): void {
     const displayCurrBombs: HTMLSpanElement = <HTMLSpanElement> document.getElementById("display-curr-bombs");
 
     displayCurrBombs.innerText = message;
+}
+
+function updateCell(row: number, col: number, reveal: boolean = true, message?: string): void {
+    const cell: Cell = board[row][col];
+    const element: HTMLTableDataCellElement = cell.element;
+    const num: number = cell.value;
+    const value: string = num.toString();
+    if (reveal) cell.revealed = true;
+    if (message === undefined) element.innerHTML = value;
+    else element.innerHTML = message;
+    element.onclick = () => cellPressed(row, col);
 }

@@ -37,6 +37,7 @@
             Bombs: <span id="display-curr-bombs">0</span>/<span id="display-total-bombs">0</span>
         </div>
         <button onclick="toggleFlagMode()">Flag <span id="display-flag-mode">Off</span></button>
+        <button onclick="toggleCheatMode()">Cheat <span id="display-cheat-mode">Off</span></button>
         <table>
             <tbody id="display-board"></tbody>
         </table>
@@ -49,6 +50,10 @@
                 <li>Small - 8 * 8, 10 bombs</li>
                 <li>Medium - 16 * 16, 40 bombs</li>
                 <li>Large - 30 * 16, 99 bombs</li>
+                <li>Press Cheat Button or "C" on keyboard to toggle CheatMode</li>
+                <li>Cheat mode lets you press on a revealed cell to expose surrounding cells</li>
+                <li>*provided that you have flagged the correct number of bombs</li>
+                <li>Basically, makes playing a lot easier! :D</li>
             </ul>
         </div>
     </body>
