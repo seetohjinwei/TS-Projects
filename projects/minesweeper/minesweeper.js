@@ -1,7 +1,14 @@
 function initCell(row, col) {
     var element = document.createElement("td");
-    element.innerHTML = " ";
-    element.onclick = function () { return cellPressed(row, col); };
+    element.innerText = " ";
+    element.onclick = function () { return cellPressed(row, col, false); };
+    element.oncontextmenu = function () {
+        cellPressed(row, col, true);
+        return false;
+    };
+    var img = document.createElement("img");
+    img.src = "";
+    element.appendChild(img);
     var value = 0;
     var revealed = false;
     var flag = false;
@@ -41,7 +48,7 @@ function displayInfo() {
     var infoDisplay = document.getElementById("display-info");
     var toggleInfo = document.getElementById("display-toggle-text");
     document.getElementById("button-toggle-info").onclick = function () {
-        if (toggleInfo.innerHTML === "Show") {
+        if (toggleInfo.innerText === "Show") {
             toggleInfo.innerText = "Hide";
             infoDisplay.style.display = "block";
         }
@@ -148,11 +155,11 @@ function endGame() {
             var cell = board[r][c];
             if (cell.revealed) {
                 if (cell.flag && cell.value !== -1) {
-                    updateCell(r, c, false, "<img src=\"pics/white_flag.png\">");
+                    updateCell(r, c, false, "pics/white_flag.png");
                 }
             }
             else if (cell.value === -1) {
-                updateCell(r, c, false, "<img src=\"pics/bomb.png\">");
+                updateCell(r, c, false, "pics/bomb.png");
             }
             else {
                 updateCell(r, c, false);
@@ -162,15 +169,18 @@ function endGame() {
         playArea.appendChild(row);
     }
 }
-function cellPressed(row, col) {
+function cellPressed(row, col, rightClick) {
+    if (rightClick === void 0) { rightClick = false; }
     if (!in_game)
         return;
     var cell = board[row][col];
     if (cell.flag)
         cellUnFlag(row, col);
-    else if (cell.revealed && cheatMode)
-        cellCheat(row, col);
-    else if (flagMode)
+    else if (cell.revealed) {
+        if (cheatMode)
+            cellCheat(row, col);
+    }
+    else if (flagMode !== rightClick)
         cellFlag(row, col);
     else
         cellReveal(row, col);
@@ -219,7 +229,7 @@ function cellFlag(row, col) {
             endGame();
         }
     }
-    updateCell(row, col, false, "<img src=\"pics/flag.png\">");
+    updateCell(row, col, false, "pics/flag.png");
 }
 function cellUnFlag(row, col) {
     if (!in_game)
@@ -283,17 +293,20 @@ function displayCurrBombs() {
     var displayCurrBombs = document.getElementById("display-curr-bombs");
     displayCurrBombs.innerText = message;
 }
-function updateCell(row, col, reveal, message) {
+function updateCell(row, col, reveal, image) {
     if (reveal === void 0) { reveal = true; }
     var cell = board[row][col];
     var element = cell.element;
     var num = cell.value;
     var value = num.toString();
+    var img = element.firstElementChild;
     if (reveal)
         cell.revealed = true;
-    if (message === undefined)
-        element.innerHTML = value;
-    else
-        element.innerHTML = message;
-    element.onclick = function () { return cellPressed(row, col); };
+    if (image === undefined) {
+        element.innerText = value;
+        img.src = "";
+    }
+    else {
+        img.src = image;
+    }
 }

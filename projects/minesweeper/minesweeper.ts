@@ -7,8 +7,15 @@ interface Cell {
 
 function initCell(row: number, col: number): Cell {
     const element: HTMLTableDataCellElement = document.createElement("td");
-    element.innerHTML = " ";
-    element.onclick = () => cellPressed(row, col);
+    element.innerText = " ";
+    element.onclick = () => cellPressed(row, col, false);
+    element.oncontextmenu = () => {
+        cellPressed(row, col, true);
+        return false;
+    }
+    const img: HTMLImageElement = document.createElement("img");
+    img.src = "";
+    element.appendChild(img);
     const value: number = 0;
     const revealed: boolean = false;
     const flag: boolean = false;
@@ -53,7 +60,7 @@ function displayInfo(): void {
     const infoDisplay: HTMLUListElement = <HTMLUListElement> document.getElementById("display-info");
     const toggleInfo: HTMLSpanElement = <HTMLSpanElement> document.getElementById("display-toggle-text");
     document.getElementById("button-toggle-info").onclick = function(): void {
-        if (toggleInfo.innerHTML === "Show") {
+        if (toggleInfo.innerText === "Show") {
             toggleInfo.innerText = "Hide";
             infoDisplay.style.display = "block";
         } else {
@@ -164,10 +171,10 @@ function endGame(): void {
             const cell: Cell = board[r][c];
             if (cell.revealed) {
                 if (cell.flag && cell.value !== -1) {
-                    updateCell(r, c, false, `<img src="pics/white_flag.png">`);
+                    updateCell(r, c, false, `pics/white_flag.png`);
                 }
             } else if (cell.value === -1) {
-                updateCell(r, c, false, `<img src="pics/bomb.png">`);
+                updateCell(r, c, false, `pics/bomb.png`);
             } else {
                 updateCell(r, c, false);
             }
@@ -177,12 +184,15 @@ function endGame(): void {
     }
 }
 
-function cellPressed(row: number, col: number): void {
+function cellPressed(row: number, col: number, rightClick: boolean = false): void {
     if (!in_game) return;
     const cell: Cell = board[row][col];
     if (cell.flag) cellUnFlag(row, col);
-    else if (cell.revealed && cheatMode) cellCheat(row, col);
-    else if (flagMode) cellFlag(row, col);
+    // else if (cell.revealed && cheatMode) cellCheat(row, col);
+    else if (cell.revealed) {
+        if (cheatMode) cellCheat(row, col);
+    }
+    else if (flagMode !== rightClick) cellFlag(row, col);
     else cellReveal(row, col);
 }
 
@@ -226,7 +236,7 @@ function cellFlag(row: number, col: number): void {
             endGame();
         }
     }
-    updateCell(row, col, false, `<img src="pics/flag.png">`);
+    updateCell(row, col, false, `pics/flag.png`);
 }
 
 function cellUnFlag(row: number, col: number): void {
@@ -293,13 +303,17 @@ function displayCurrBombs(): void {
     displayCurrBombs.innerText = message;
 }
 
-function updateCell(row: number, col: number, reveal: boolean = true, message?: string): void {
+function updateCell(row: number, col: number, reveal: boolean = true, image?: string): void {
     const cell: Cell = board[row][col];
     const element: HTMLTableDataCellElement = cell.element;
     const num: number = cell.value;
     const value: string = num.toString();
+    const img: HTMLImageElement = <HTMLImageElement> element.firstElementChild;
     if (reveal) cell.revealed = true;
-    if (message === undefined) element.innerHTML = value;
-    else element.innerHTML = message;
-    element.onclick = () => cellPressed(row, col);
+    if (image === undefined) {
+        element.innerText = value;
+        img.src = "";
+    } else {
+        img.src = image;
+    }
 }
