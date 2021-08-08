@@ -1,174 +1,198 @@
+var Task = (function () {
+    function Task(name, done) {
+        var _this = this;
+        if (done === void 0) { done = false; }
+        this.name = name;
+        this.done = done;
+        var bin = document.createElement("span");
+        bin.innerText = String.fromCodePoint(128465);
+        bin.onclick = function () { return _this["delete"](); };
+        var space = document.createElement("span");
+        space.innerText = " ";
+        var display = document.createElement("span");
+        display.innerText = this.name;
+        display.onclick = function () {
+            if (_this.done)
+                _this.unstrike();
+            else
+                _this.strike();
+        };
+        this.element = document.createElement("li");
+        this.element.append(bin, space, display);
+        if (this.done)
+            this.strike();
+    }
+    Task.prototype["delete"] = function () {
+        tasks["delete"](this);
+    };
+    Task.prototype.strike = function () {
+        this.element.style.textDecoration = "line-through";
+        this.done = true;
+    };
+    Task.prototype.unstrike = function () {
+        this.element.style.textDecoration = null;
+        this.done = false;
+    };
+    return Task;
+}());
+var Tasks = (function () {
+    function Tasks() {
+        this.list = [];
+        this.retrieveLocal();
+        this.display = document.getElementById("display-tasks");
+    }
+    Tasks.prototype.add = function (name) {
+        var task = new Task(name);
+        this.list.push(task);
+        this.display.appendChild(task.element);
+    };
+    Tasks.prototype.deleteByIndex = function (start, end) {
+        if (end === void 0) { end = start + 1; }
+        end = Math.min(end, this.list.length + 1);
+        for (var index = start; index < end; index++) {
+            var task = this.list[start - 1];
+            this["delete"](task);
+        }
+    };
+    Tasks.prototype["delete"] = function (task) {
+        var index = this.list.indexOf(task);
+        this.list.splice(index, 1);
+        this.display.removeChild(task.element);
+    };
+    Tasks.prototype.clear = function () {
+        this.list = [];
+        this.refresh();
+    };
+    Tasks.prototype.refresh = function () {
+        var _this = this;
+        while (this.display.hasChildNodes()) {
+            this.display.removeChild(this.display.firstChild);
+        }
+        this.list.forEach(function (task) { return _this.display.appendChild(task.element); });
+    };
+    Tasks.prototype.retrieveLocal = function () {
+        var result = [];
+        var arr = JSON.parse(localStorage.getItem("tasks")) || [];
+        for (var index = 0; index < arr.length; index++) {
+            var obj = arr[index];
+            var name_1 = obj["name"];
+            var done = obj["done"];
+            var task = new Task(name_1, done);
+            result.push(task);
+        }
+        this.list = result;
+    };
+    return Tasks;
+}());
+var Button = (function () {
+    function Button() {
+    }
+    Button.add = function () {
+        var input = Input.input.value;
+        var sanitisedInput = input.replaceAll(/;/g, "");
+        if (!sanitisedInput.match(/\S/))
+            return;
+        tasks.add(sanitisedInput);
+        Input.input.value = "";
+    };
+    Button.remove = function () {
+        var input = Input.remove.value;
+        if (input.match(/^\d+$/)) {
+            var index = parseInt(input);
+            tasks.deleteByIndex(index);
+        }
+        else if (input.match(/^\d+-\d+$/)) {
+            var digits = input.split("-");
+            var start = parseInt(digits[0]);
+            var end = parseInt(digits[1]);
+            tasks.deleteByIndex(start, end + 1);
+        }
+        else if (input.match(/^\d+-$/)) {
+            var index = parseInt(input.substr(0, input.length - 1));
+            tasks.deleteByIndex(index, tasks.list.length + 1);
+        }
+        else if (input.match(/^-\d+$/)) {
+            var index = parseInt(input.substr(1));
+            tasks.deleteByIndex(1, index + 1);
+        }
+        else
+            return;
+        Input.remove.value = "";
+    };
+    Button.clear = function () {
+        if (confirm("Clear all?")) {
+            tasks.clear();
+        }
+    };
+    Button.save = function () {
+        localStorage.setItem("tasks", JSON.stringify(tasks.list));
+    };
+    Button.recover = function () {
+        tasks.retrieveLocal();
+        tasks.refresh();
+    };
+    Button["import"] = function () {
+        var hash = this.browserImport.value;
+        if (!hash.match(/^[01][^;]+(;[01][^;]+)*$/))
+            return;
+        var tasksEncoded = hash.split(";");
+        tasks.clear();
+        for (var i = 0; i < tasksEncoded.length; i++) {
+            var item = tasksEncoded[i].substr(1);
+            var done = tasksEncoded[i].substr(0, 1) === "1";
+            var task = new Task(item, done);
+            tasks.list.push(task);
+        }
+        this.browserImport.value = "";
+        Button.save();
+        tasks.refresh();
+    };
+    Button["export"] = function () {
+        var tasksEncoded = [];
+        for (var i = 0; i < tasks.list.length; i++) {
+            var item = tasks.list[i].name;
+            var done = tasks.list[i].done ? "1" : "0";
+            tasksEncoded.push(done + item);
+        }
+        this.browserImport.value = tasksEncoded.join(";");
+        this.browserImport.select();
+    };
+    Button.browserImport = document.getElementById("browser-import");
+    return Button;
+}());
+var Input = (function () {
+    function Input() {
+    }
+    Input.input = document.getElementById("user-input");
+    Input.remove = document.getElementById("user-remove");
+    return Input;
+}());
+var tasks = new Tasks();
 window.onload = function () {
-    buttons();
-    taskDisplayFunc();
+    tasks.refresh();
     displayInfo();
     document.addEventListener('keypress', function (press) {
         if (press.key !== "Enter")
             return;
-        if (userInput.value !== "")
-            addFunc();
-        if (userRemove.value !== "")
-            removeFunc();
+        if (Input.input.value !== "")
+            Button.add();
+        if (Input.remove.value !== "")
+            Button.remove();
     });
 };
-window.onbeforeunload = saveFunc;
-function buttons() {
-    var buttonAddTask = document.getElementById("button-tasks-add");
-    var buttonRemoveTask = document.getElementById("button-tasks-remove");
-    var buttonClearTasks = document.getElementById("button-tasks-clear");
-    var buttonSaveTasks = document.getElementById("button-tasks-save");
-    var buttonRecoverTasks = document.getElementById("button-tasks-recover");
-    var buttonImportTasks = document.getElementById("button-tasks-import");
-    var buttonExportTasks = document.getElementById("button-tasks-export");
-    buttonAddTask.onclick = addFunc;
-    buttonRemoveTask.onclick = removeFunc;
-    buttonClearTasks.onclick = function () {
-        if (confirm("Clear all?")) {
-            tasks = [];
-            taskDisplayFunc();
-        }
-    };
-    buttonSaveTasks.onclick = saveFunc;
-    buttonRecoverTasks.onclick = function () {
-        tasks = localStorage.getTasks();
-        taskDisplayFunc();
-    };
-    var browserImport = document.getElementById("browser-import");
-    buttonImportTasks.onclick = function () {
-        decodeTasks(browserImport.value);
-        browserImport.value = "";
-    };
-    buttonExportTasks.onclick = function () {
-        browserImport.value = encodeTasks();
-        browserImport.select();
-    };
-}
-var userInput = document.getElementById("user-input");
-var userRemove = document.getElementById("user-remove");
-Storage.prototype.setTasks = function (obj) {
-    return this.setItem("tasks", JSON.stringify(obj));
-};
-Storage.prototype.getTasks = function () {
-    return JSON.parse(this.getItem("tasks"));
-};
-var tasks = localStorage.getTasks() || [];
-function saveFunc() {
-    localStorage.setTasks(tasks);
-    taskDisplayFunc();
-}
-function addFunc() {
-    var input = userInput.value;
-    var sanitisedInput = input.replaceAll(/;/g, "");
-    if (!sanitisedInput.match(/\S/))
-        return;
-    tasks.push([sanitisedInput, false]);
-    userInput.value = "";
-    taskDisplayFunc();
-}
-function removeFunc() {
-    var input = userRemove.value;
-    if (input.match(/^\d+$/)) {
-        var indexToRemove = parseInt(input);
-        tasks.splice(indexToRemove - 1, 1);
-    }
-    else if (input.match(/^\d+-\d+$/)) {
-        var digits = input.split("-");
-        var a = parseInt(digits[0]);
-        var b = parseInt(digits[1]);
-        tasks.splice(a - 1, b - a + 1);
-    }
-    else if (input.match(/^\d+-$/)) {
-        var indexToRemove = parseInt(input.substr(0, input.length - 1));
-        tasks.splice(indexToRemove - 1);
-    }
-    else if (input.match(/^-\d+$/)) {
-        var numToRemove = parseInt(input.substr(1));
-        tasks.splice(0, numToRemove);
-    }
-    else
-        return;
-    userRemove.value = "";
-    taskDisplayFunc();
-}
-function taskDisplayFunc() {
-    var ol = document.createElement("ol");
-    var _loop_1 = function (i) {
-        var li = document.createElement("li");
-        var binIcon = document.createElement("span");
-        binIcon.innerHTML = "&#128465";
-        binIcon.onclick = function () { deleteThisTask(i); };
-        li.appendChild(binIcon);
-        var emptySpace = document.createElement("span");
-        emptySpace.innerText = " ";
-        li.appendChild(emptySpace);
-        var taskToAppend = document.createElement("span");
-        taskToAppend.setAttribute("data-index", i.toString());
-        taskToAppend.innerText = tasks[i][0];
-        if (tasks[i][1])
-            strikeThroughTask(taskToAppend);
-        else
-            unstrikeTask(taskToAppend);
-        li.appendChild(taskToAppend);
-        ol.appendChild(li);
-    };
-    for (var i = 0; i < tasks.length; i++) {
-        _loop_1(i);
-    }
-    var taskDisplay = document.getElementById("display-tasks");
-    taskDisplay.innerHTML = "";
-    taskDisplay.appendChild(ol);
-}
-function strikeThroughTask(item) {
-    var index = parseInt(item.getAttribute("data-index"));
-    var text = item.innerText;
-    item.innerHTML = "<span style=\"text-decoration:line-through\"><em>" + text + "</em></span>";
-    item.onclick = function () { unstrikeTask(this); };
-    tasks[index][1] = true;
-}
-function unstrikeTask(item) {
-    var index = parseInt(item.getAttribute("data-index"));
-    var text = item.innerText;
-    item.innerHTML = "<span>" + text + "</span>";
-    item.onclick = function () { strikeThroughTask(this); };
-    tasks[index][1] = false;
-}
-function deleteThisTask(index) {
-    tasks.splice(index, 1);
-    taskDisplayFunc();
-}
-function encodeTasks() {
-    var tasksEncoded = [];
-    for (var i = 0; i < tasks.length; i++) {
-        var item = tasks[i][0];
-        var done = tasks[i][1] ? "1" : "0";
-        tasksEncoded.push(done + item);
-    }
-    return tasksEncoded.join(";");
-}
-function decodeTasks(hash) {
-    if (!hash.match(/^[01][^;]+(;[01][^;]+)*$/))
-        return;
-    var tasksEncoded = hash.split(";");
-    tasks = [];
-    for (var i = 0; i < tasksEncoded.length; i++) {
-        var item = tasksEncoded[i].substr(1);
-        var done = !!(tasksEncoded[i].substr(0, 1) == "1");
-        tasks.push([item, done]);
-    }
-    saveFunc();
-}
+window.onbeforeunload = Button.save;
 function displayInfo() {
     var infoDisplay = document.getElementById("display-info");
     var toggleInfo = document.getElementById("display-toggle-text");
-    infoDisplay.style.display = "none";
-    document.getElementById("button-toggle-info").onclick = function () {
-        if (toggleInfo.innerHTML === "Show") {
+    var button = document.getElementById("button-toggle-info");
+    button.onclick = function () {
+        if (infoDisplay.hidden) {
             toggleInfo.innerText = "Hide";
-            infoDisplay.style.display = "block";
+            infoDisplay.hidden = false;
         }
         else {
             toggleInfo.innerText = "Show";
-            infoDisplay.style.display = "none";
+            infoDisplay.hidden = true;
         }
     };
 }

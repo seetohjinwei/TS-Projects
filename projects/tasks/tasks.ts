@@ -1,184 +1,213 @@
-// task = ["Task", markAsDone]
-type task = [string, boolean];
+class Task {
+    name: string;
+    done: boolean;
+    element: HTMLLIElement;
+    
+    constructor(name: string, done: boolean = false) {
+        this.name = name;
+        this.done = done;
+
+        const bin: HTMLSpanElement = document.createElement("span");
+        bin.innerText = String.fromCodePoint(128465);
+        bin.onclick = () => this.delete();
+
+        const space: HTMLSpanElement = document.createElement("span");
+        space.innerText = " ";
+
+        const display: HTMLSpanElement = document.createElement("span");
+        display.innerText = this.name;
+        display.onclick = () => {
+            if (this.done) this.unstrike();
+            else this.strike();
+        }
+
+        this.element = document.createElement("li")
+        this.element.append(bin, space, display);
+        if (this.done) this.strike();
+    }
+
+    delete(): void {
+        tasks.delete(this);
+    }
+
+    strike(): void {
+        this.element.style.textDecoration = "line-through";
+        this.done = true;
+    }
+
+    unstrike(): void {
+        this.element.style.textDecoration = null;
+        this.done = false;
+    }
+}
+
+class Tasks {
+    list: Task[]
+    display: HTMLOListElement;
+
+    constructor() {
+        this.list = [];
+        this.retrieveLocal();
+        this.display = <HTMLOListElement> document.getElementById("display-tasks");
+    }
+
+    add(name: string): void {
+        const task: Task = new Task(name);
+        this.list.push(task);
+        this.display.appendChild(task.element);
+    }
+
+    /**
+     * @param start start index
+     * @param end inclusive of the end index
+     */
+    deleteByIndex(start: number, end: number = start + 1): void {
+        end = Math.min(end, this.list.length + 1);
+        for (let index = start; index < end; index++) {
+            const task: Task = this.list[start - 1];
+            this.delete(task);
+        }
+    }
+
+    delete(task: Task): void {
+        const index: number = this.list.indexOf(task);
+        this.list.splice(index, 1);
+        this.display.removeChild(task.element);
+    }
+
+    clear(): void {
+        this.list = [];
+        this.refresh();
+    }
+
+    refresh(): void {
+        while (this.display.hasChildNodes()) {
+            this.display.removeChild(this.display.firstChild);
+        }
+        this.list.forEach(
+            task => this.display.appendChild(task.element)
+        );
+    }
+
+    retrieveLocal(): void {
+        const result: Task[] = [];
+        const arr: {[parameter: string]: any}[] = JSON.parse(localStorage.getItem("tasks")) || [];
+        for (let index = 0; index < arr.length; index++) {
+            const obj = arr[index];
+            const name: string = obj["name"];
+            const done: boolean = obj["done"];
+            const task = new Task(name, done);
+            result.push(task);
+        }
+        this.list = result;
+    }
+}
+
+class Button {
+    static add(): void {
+        const input: string = Input.input.value;
+        const sanitisedInput: string = input.replaceAll(/;/g, "");
+        if (!sanitisedInput.match(/\S/)) return;
+        tasks.add(sanitisedInput);
+        Input.input.value = "";
+    }
+
+    static remove(): void {
+        const input: string = Input.remove.value;
+        if (input.match(/^\d+$/)) {
+            const index: number = parseInt(input);
+            tasks.deleteByIndex(index);
+        } else if (input.match(/^\d+-\d+$/)) {
+            const digits: string[] = input.split("-");
+            const start: number = parseInt(digits[0]);
+            const end: number = parseInt(digits[1]);
+            tasks.deleteByIndex(start, end + 1);
+        } else if (input.match(/^\d+-$/)) {
+            const index: number = parseInt(input.substr(0, input.length - 1));
+            tasks.deleteByIndex(index, tasks.list.length + 1);
+        } else if (input.match(/^-\d+$/)) {
+            const index: number = parseInt(input.substr(1));
+            tasks.deleteByIndex(1, index + 1)
+        } else return;
+        Input.remove.value = "";
+    }
+
+    static clear(): void {
+        if (confirm("Clear all?")) {
+            tasks.clear();
+        }
+    }
+
+    static save(): void {
+        localStorage.setItem("tasks", JSON.stringify(tasks.list));
+    }
+
+    static recover(): void {
+        tasks.retrieveLocal();
+        tasks.refresh();
+    }
+
+    private static browserImport: HTMLInputElement = <HTMLInputElement> document.getElementById("browser-import");
+
+    static import(): void {
+        const hash: string = this.browserImport.value;
+        if (!hash.match(/^[01][^;]+(;[01][^;]+)*$/)) return;
+        const tasksEncoded: string[] = hash.split(";");
+        tasks.clear();
+        for (let i = 0; i < tasksEncoded.length; i++) {
+            const item = tasksEncoded[i].substr(1);
+            const done = tasksEncoded[i].substr(0, 1) === "1";
+            const task: Task = new Task(item, done);
+            tasks.list.push(task);
+        }
+        this.browserImport.value = "";
+        Button.save();
+        tasks.refresh();
+    }
+
+    static export(): void {
+        const tasksEncoded: string[] = [];
+        for (let i = 0; i < tasks.list.length; i++) {
+            const item = tasks.list[i].name;
+            const done = tasks.list[i].done ? "1" : "0";
+            tasksEncoded.push(done + item);
+        }
+        this.browserImport.value = tasksEncoded.join(";");
+        this.browserImport.select();
+    }
+}
+
+class Input {
+    static input: HTMLInputElement = <HTMLInputElement> document.getElementById("user-input");
+    static remove: HTMLInputElement = <HTMLInputElement> document.getElementById("user-remove");
+}
+
+const tasks: Tasks = new Tasks();
 
 window.onload = () => {
-    buttons();
-    taskDisplayFunc();
+    tasks.refresh();
     displayInfo();
 
     document.addEventListener('keypress', (press) => {
         if (press.key !== "Enter") return;
-        if (userInput.value !== "") addFunc();
-        if (userRemove.value !== "") removeFunc();
+        if (Input.input.value !== "") Button.add();
+        if (Input.remove.value !== "") Button.remove();
     });
 };
 
-window.onbeforeunload = saveFunc;
-
-function buttons(): void {
-    const buttonAddTask: HTMLButtonElement = <HTMLButtonElement> document.getElementById("button-tasks-add");
-    const buttonRemoveTask: HTMLButtonElement = <HTMLButtonElement> document.getElementById("button-tasks-remove");
-    const buttonClearTasks: HTMLButtonElement = <HTMLButtonElement> document.getElementById("button-tasks-clear");
-    const buttonSaveTasks: HTMLButtonElement = <HTMLButtonElement> document.getElementById("button-tasks-save");
-    const buttonRecoverTasks: HTMLButtonElement = <HTMLButtonElement> document.getElementById("button-tasks-recover");
-    const buttonImportTasks: HTMLButtonElement = <HTMLButtonElement> document.getElementById("button-tasks-import");
-    const buttonExportTasks: HTMLButtonElement = <HTMLButtonElement> document.getElementById("button-tasks-export");
-
-    buttonAddTask.onclick = addFunc;
-    buttonRemoveTask.onclick = removeFunc;
-    buttonClearTasks.onclick = () => {
-        if (confirm("Clear all?")) {
-            tasks = [];
-            taskDisplayFunc();
-        }
-    };
-    buttonSaveTasks.onclick = saveFunc;
-    buttonRecoverTasks.onclick = () => {
-        tasks = localStorage.getTasks();
-        taskDisplayFunc();
-    };
-    const browserImport: HTMLInputElement = <HTMLInputElement> document.getElementById("browser-import");
-    buttonImportTasks.onclick = () => {
-        decodeTasks(browserImport.value);
-        browserImport.value = "";
-    };
-    buttonExportTasks.onclick = () => {
-        browserImport.value = encodeTasks();
-        browserImport.select();
-    };
-}
-
-const userInput: HTMLInputElement = <HTMLInputElement> document.getElementById("user-input");
-const userRemove: HTMLInputElement = <HTMLInputElement> document.getElementById("user-remove");
-
-// https://stackoverflow.com/questions/3357553/how-do-i-store-an-array-in-localstorage
-Storage.prototype.setTasks = function(obj: task[]): string {
-    return this.setItem("tasks", JSON.stringify(obj));
-}
-Storage.prototype.getTasks = function(): task[] {
-    return JSON.parse(this.getItem("tasks"));
-}
-
-var tasks: task[] = localStorage.getTasks() || [];
-
-function saveFunc(): void {
-    localStorage.setTasks(tasks);
-    taskDisplayFunc();
-}
-
-function addFunc(): void {
-    const input: string = userInput.value;
-    const sanitisedInput: string = input.replaceAll(/;/g, "");
-    if (!sanitisedInput.match(/\S/)) return;
-    tasks.push([sanitisedInput, false]);
-    userInput.value = "";
-    taskDisplayFunc();
-}
-
-function removeFunc(): void {
-    const input: string = userRemove.value;
-    if (input.match(/^\d+$/)) {
-        const indexToRemove: number = parseInt(input);
-        tasks.splice(indexToRemove - 1, 1);
-    } else if (input.match(/^\d+-\d+$/)) {
-        const digits: string[] = input.split("-");
-        const a: number = parseInt(digits[0]);
-        const b: number = parseInt(digits[1]);
-        tasks.splice(a - 1, b - a + 1);
-    } else if (input.match(/^\d+-$/)) {
-        const indexToRemove: number = parseInt(input.substr(0, input.length - 1));
-        tasks.splice(indexToRemove - 1);
-    } else if (input.match(/^-\d+$/)) {
-        const numToRemove: number = parseInt(input.substr(1));
-        tasks.splice(0, numToRemove);
-    } else return;
-    userRemove.value = "";
-    taskDisplayFunc();
-}
-
-function taskDisplayFunc(): void {
-    const ol = document.createElement("ol");
-    for (let i = 0; i < tasks.length; i++) {
-        const li: HTMLLIElement = document.createElement("li");
-
-        const binIcon: HTMLSpanElement = document.createElement("span");
-        binIcon.innerHTML = "&#128465";
-        binIcon.onclick = function():void { deleteThisTask(i) };
-        li.appendChild(binIcon);
-
-        const emptySpace: HTMLSpanElement = document.createElement("span");
-        emptySpace.innerText = " ";
-        li.appendChild(emptySpace);
-
-        const taskToAppend: HTMLSpanElement = document.createElement("span");
-        taskToAppend.setAttribute("data-index", i.toString());
-        taskToAppend.innerText = tasks[i][0];
-        if (tasks[i][1]) strikeThroughTask(taskToAppend);
-        else             unstrikeTask(taskToAppend);
-        li.appendChild(taskToAppend);
-
-        ol.appendChild(li);
-    }
-
-    const taskDisplay: HTMLSpanElement = <HTMLSpanElement> document.getElementById("display-tasks");
-    taskDisplay.innerHTML = "";
-    taskDisplay.appendChild(ol);
-}
-
-function strikeThroughTask(item: HTMLSpanElement): void {
-    const index: number = parseInt(item.getAttribute("data-index"));
-    const text: string = item.innerText;
-    item.innerHTML = `<span style="text-decoration:line-through"><em>${text}</em></span>`;
-    item.onclick = function(): void { unstrikeTask(<HTMLSpanElement> this); };
-    tasks[index][1] = true;
-}
-
-function unstrikeTask(item: HTMLSpanElement): void {
-    const index: number = parseInt(item.getAttribute("data-index"));
-    const text: string = item.innerText;
-    item.innerHTML = `<span>${text}</span>`;
-    item.onclick = function(): void { strikeThroughTask(<HTMLSpanElement> this); };
-    tasks[index][1] = false;
-}
-
-function deleteThisTask(index: number): void {
-    tasks.splice(index, 1);
-    taskDisplayFunc();
-}
-
-function encodeTasks(): string {
-    const tasksEncoded: string[] = [];
-    for (let i = 0; i < tasks.length; i++) {
-        const item = tasks[i][0];
-        const done = tasks[i][1] ? "1" : "0";
-        tasksEncoded.push(done + item);
-    }
-    return tasksEncoded.join(";");
-}
-
-function decodeTasks(hash: string): void {
-    if (!hash.match(/^[01][^;]+(;[01][^;]+)*$/)) return;
-    const tasksEncoded: string[] = hash.split(";");
-    tasks = [];
-    for (let i = 0; i < tasksEncoded.length; i++) {
-        const item = tasksEncoded[i].substr(1);
-        const done = !!(tasksEncoded[i].substr(0, 1) == "1");
-        tasks.push([item, done]);
-    }
-    saveFunc();
-}
+window.onbeforeunload = Button.save;
 
 function displayInfo(): void {
     const infoDisplay: HTMLUListElement = <HTMLUListElement> document.getElementById("display-info");
     const toggleInfo: HTMLSpanElement = <HTMLSpanElement> document.getElementById("display-toggle-text");
-    infoDisplay.style.display = "none";
-    document.getElementById("button-toggle-info").onclick = function(): void {
-        if (toggleInfo.innerHTML === "Show") {
+    const button: HTMLButtonElement = <HTMLButtonElement> document.getElementById("button-toggle-info");
+    button.onclick = function(): void {
+        if (infoDisplay.hidden) {
             toggleInfo.innerText = "Hide";
-            infoDisplay.style.display = "block";
+            infoDisplay.hidden = false;
         } else {
             toggleInfo.innerText = "Show";
-            infoDisplay.style.display = "none";
+            infoDisplay.hidden = true;
         }
     }
 }

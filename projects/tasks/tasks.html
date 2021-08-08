@@ -14,24 +14,24 @@
         <h3>by Jin Wei</h3>
         <p>
             <input type="text" id="user-input" autofocus maxlength="50">
-            <button id="button-tasks-add">+</button>
+            <button onclick="Button.add()">+</button>
         </p>
         <div>
             <p>
                 <input type="text" id="user-remove" size="5">
-                <button id="button-tasks-remove">DEL</button>
-                <button id="button-tasks-clear">Clear ALL</button>
+                <button onclick="Button.remove()">DEL</button>
+                <button onclick="Button.clear()">Clear ALL</button>
             </p>
             <p>
-                <button id="button-tasks-save">Save</button>
-                <button id="button-tasks-recover">Recover last saved</button>
-                <button id="button-tasks-export">Export</button>
-                <button id="button-tasks-import">Import</button>
+                <button onclick="Button.save()">Save</button>
+                <button onclick="Button.recover()">Recover last saved</button>
+                <button onclick="Button.export()">Export</button>
+                <button onclick="Button.import()">Import</button>
                 <input type="text" id="browser-import">
             </p>
-            <span id="display-tasks"></span>
+            <ol id="display-tasks"></ol>
             <button id="button-toggle-info"><span id="display-toggle-text">Show</span> Info</button>
-            <ul id="display-info">
+            <ul id="display-info" hidden="true">
                 <li>Tip: Enter works for both adding and removing</li>
                 <li>Type your task in the input field then press +</li>
                 <li>Click on the task to mark as done/undone</li>
