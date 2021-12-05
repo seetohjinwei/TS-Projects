@@ -1,5 +1,5 @@
 class Cell {
-    element: HTMLTableDataCellElement;
+    element: HTMLTableCellElement;
     value: number;
     revealed: boolean;
     flag: boolean;
@@ -7,7 +7,7 @@ class Cell {
     col: number;
 
     constructor(row: number, col: number) {
-        const element: HTMLTableDataCellElement = document.createElement("td");
+        const element: HTMLTableCellElement = document.createElement("td");
         element.innerText = " ";
         element.onclick = () => this.pressed(false);
         element.oncontextmenu = () => {
@@ -251,7 +251,7 @@ class Board {
         for (let r = 0; r < this.rowsize; r++) {
             const row: HTMLTableRowElement = document.createElement("tr");
             for (let c = 0; c < this.colsize; c++) {
-                const cell: HTMLTableDataCellElement = this.cells[r][c].element;
+                const cell: HTMLTableCellElement = this.cells[r][c].element;
                 row.appendChild(cell);
             }
             playArea.appendChild(row);

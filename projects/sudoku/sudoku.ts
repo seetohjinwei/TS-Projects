@@ -21,8 +21,8 @@ var board: number[][] = [
     [0,0,0,0,0,0,0,0,0]
 ];
 
-var selectorsArray: HTMLTableDataCellElement[] = [];
-var cellsSelected: HTMLTableDataCellElement[] = [];
+var selectorsArray: HTMLTableCellElement[] = [];
+var cellsSelected: HTMLTableCellElement[] = [];
 
 const message: HTMLElement = document.getElementById("display-message");
 const buttonSolve: HTMLElement = document.getElementById("button-solve");
@@ -131,7 +131,7 @@ function handleKeyPress(value: string): void {
         clickSelector(value);
     } else {
         if (value === "E") value = "0";
-        cellsSelected.forEach((cell: HTMLTableDataCellElement) => {
+        cellsSelected.forEach((cell: HTMLTableCellElement) => {
             cell.style.backgroundColor = "";
             const row: number = parseInt(cell.getAttribute("row"));
             const col: number = parseInt(cell.getAttribute("col"));
@@ -149,7 +149,7 @@ function updateBoard(): void {
     for (let i = 0; i < 9; i++) {
         const tr: HTMLTableRowElement = document.createElement("tr");
         for (let j = 0; j < 9; j++) {
-            const td: HTMLTableDataCellElement = document.createElement("td");
+            const td: HTMLTableCellElement = document.createElement("td");
             const value: number = board[i][j];
             const displayedValue: string = (value === 0) ? "" : value.toString();
             td.innerText = displayedValue;
@@ -172,8 +172,8 @@ function displaySelectors(show: boolean): void {
     if (!show) return;
     const tr: HTMLTableRowElement = document.createElement("tr");
 
-    function makeTD(value: string): HTMLTableDataCellElement {
-        const td: HTMLTableDataCellElement = document.createElement("td");
+    function makeTD(value: string): HTMLTableCellElement {
+        const td: HTMLTableCellElement = document.createElement("td");
         td.innerText = value;
         td.setAttribute("value", value);
         td.setAttribute("selected", "false");
@@ -182,17 +182,17 @@ function displaySelectors(show: boolean): void {
     }
 
     for (let i = 1; i <= 9; i++) {
-        const td: HTMLTableDataCellElement = makeTD(i.toString());
+        const td: HTMLTableCellElement = makeTD(i.toString());
         tr.appendChild(td);
         selectorsArray.push(td);
     }
-    const td: HTMLTableDataCellElement = makeTD("E");
+    const td: HTMLTableCellElement = makeTD("E");
     tr.appendChild(td);
     selectorsArray.push(td);
     selectors.appendChild(tr);
 }
 
-function clickCell(cell: HTMLTableDataCellElement): void {
+function clickCell(cell: HTMLTableCellElement): void {
     if (value !==  null) {
         const row: number = parseInt(cell.getAttribute("row"));
         const col: number = parseInt(cell.getAttribute("col"));
@@ -216,7 +216,7 @@ function clickSelector(string: string): void {
         return;
     }
     const index: number = (string === "E") ? 9 : parseInt(string) - 1;
-    const cell: HTMLTableDataCellElement = selectorsArray[index];
+    const cell: HTMLTableCellElement = selectorsArray[index];
     const selected: boolean = cell.getAttribute("selected") === "true";
     if (selected) {
         cell.setAttribute("selected", "false");
