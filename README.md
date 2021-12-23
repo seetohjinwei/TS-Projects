@@ -1,2 +1,4 @@
 # Jin Wei's website
-Head over to projects to see some of my mini-projects
+
+Website to hold a bunch of small typescript projects.
+Built with vanilla typescript.
