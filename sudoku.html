@@ -1,0 +1,75 @@
+<html>
+    <head>
+        <title>Sudoku</title>
+        <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+        <meta content="utf-8" http-equiv="encoding">
+        <style>
+            .body {
+                font-family: 'Times New Roman', Times, serif;
+            }
+            table {
+                border-collapse: collapse;
+                table-layout: fixed;
+                width: 280px;
+            }
+            tbody {
+                border: solid medium black;
+            }
+            td {
+                border: solid thin black;
+                text-align: center;
+                vertical-align: middle;
+                width: 30px;
+                height: 30px;
+                overflow: hidden;
+            }
+            td:first-child {
+                border-left:solid;
+            }
+            td:nth-child(3n) {
+                border-right:solid ;
+            }
+            tr:first-child {
+                border-top:solid;
+            }
+            tr:nth-child(3n) td {
+                border-bottom:solid ;
+            }
+        </style>
+    </head>
+    <body>
+        <h1><a href="index.html">Sudoku</a></h1>
+        <h3>by Jin Wei</h3>
+        <span id="display-message">Go ahead!</span>
+        <div>
+            Generate board (Doesn't generate valid sudokus YET!): 
+            <button id="button-easy">Easy</button>
+            <button id="button-medium">Medium</button>
+            <button id="button-hard">Hard</button>
+            <button id="button-validate">Validate</button>
+        </div>
+        <div>
+            Solve board: 
+            <button id="button-solve">Solve!</button>
+            <button id="button-reset">Reset Board</button>
+        </div>
+        <table class="display-board">
+            <tbody id="display-board"></tbody>
+        </table>
+        <br>
+        <table>
+            <tbody id="display-selectors"></tbody>
+        </table>
+        <button id="button-toggle-info"><span id="display-toggle-text">Show</span> Info</button>
+        <ul id="display-info">
+            <li>Use either on-screen buttons or keyboard seamlessly</li>
+            <li>You can select either the selectors or cells first</li>
+            <li>Should work intuitively, just play around with it!</li>
+            <li>Give >20 clues!</li>
+            <li>Give a proper sudoku (only 1 solution), otherwise results not guranteed!</li>
+            <li>Done with backtracking</li>
+            <li><a href="https://www.youtube.com/watch?v=G_UYXzGuqvM" target=”_blank”>Computerphile YouTube video</a></li>
+        </ul>
+    </body>
+    <script src="sudoku/sudoku.js"></script>
+</html>
